@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact | Sai Praneeth & Elvy Student Stays</title>
+  <meta name="description" content="Contact Sai Praneeth & Elvy Student Stays for room availability and booking enquiry." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body data-page="contact">
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="../index.html" class="brand">Sai Praneeth & Elvy Student Stays</a>
+      <button class="menu-toggle" aria-label="Toggle menu" id="menuToggle" type="button">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav" id="mainNav">
+        <a href="../index.html" data-nav="home">Home</a>
+        <a href="hostels.html" data-nav="hostels">Hostels</a>
+        <a href="facilities.html" data-nav="facilities">Facilities</a>
+        <a href="gallery.html" data-nav="gallery">Gallery</a>
+        <a href="distance.html" data-nav="distance">Distance Finder</a>
+        <a href="contact.html" data-nav="contact">Contact</a>
+      </nav>
+      <a class="btn btn-gold nav-cta" href="https://wa.me/910000000000?text=Hi%2C%20I%20want%20to%20book%20a%20room" target="_blank" rel="noopener noreferrer">Book Room on WhatsApp</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <h1>Contact / Enquiry</h1>
+        <p>Send your details and we will reply with room availability.</p>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
+        <div class="contact-layout">
+          <form class="card contact-form">
+            <input type="hidden" name="hostel" value="General Enquiry" />
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" required />
+            <label for="phone">Phone number</label>
+            <input id="phone" name="phone" type="tel" required />
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="4" required></textarea>
+            <button type="submit" class="btn btn-primary">Send Enquiry</button>
+            <p class="status-text" aria-live="polite"></p>
+          </form>
+
+          <div class="card quick-contact">
+            <h4>Quick Contact</h4>
+            <a class="btn btn-outline" href="tel:+910000000000"><i class="fa-solid fa-phone"></i> Call Owner</a>
+            <a class="btn btn-gold" href="https://wa.me/910000000000?text=Hi%2C%20I%20want%20to%20book%20a%20room" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i> WhatsApp Chat</a>
+            <a class="btn btn-primary" href="hostels.html">View Hostels</a>
+          </div>
+        </div>
+
+        <div class="card contact-info-card">
+          <h4>Enquiry & Booking Contact Details</h4>
+          <div class="contact-info-list">
+            <p><strong>Phone:</strong> <span id="contactPhoneText"></span></p>
+            <p><strong>WhatsApp:</strong> <span id="contactWhatsappText"></span></p>
+            <p><strong>Email:</strong> <span id="contactEmailText"></span></p>
+            <p><strong>Address:</strong> <span id="contactAddressText"></span></p>
+          </div>
+          <div class="action-row">
+            <a id="contactCallLink" class="btn btn-outline" href="#"><i class="fa-solid fa-phone"></i> Call Now</a>
+            <a id="contactWhatsappLink" class="btn btn-gold" href="#" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i> Book on WhatsApp</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <h4>Sai Praneeth & Elvy Student Stays</h4>
+        <p>Trusted student accommodation group in one locality.</p>
+      </div>
+      <div>
+        <h5>Quick Links</h5>
+        <ul>
+          <li><a href="../index.html">Home</a></li>
+          <li><a href="hostels.html">Hostels</a></li>
+          <li><a href="facilities.html">Facilities</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Contact Info</h5>
+        <p>Phone number: +91 00000 00000</p>
+        <p>Address: Locality, City, State</p>
+        <p>WhatsApp: +91 00000 00000</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../script.js"></script>
+</body>
+</html>
