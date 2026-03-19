@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin | Sai Praneeth & Elvy Student Stays</title>
-  <meta name="description" content="Admin panel to update enquiry and booking contact details." />
+  <title>Admin Enquiries | Sai Praneeth & Elvy Student Stays</title>
+  <meta name="description" content="Admin page for viewing and refreshing recent contact enquiries." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -22,57 +22,44 @@
   <main>
     <section class="page-hero admin-hero">
       <div class="container">
-        <h1>Admin Dashboard</h1>
-        <p>Owner access workspace with dedicated pages for each management section.</p>
+        <h1>Admin: Enquiries</h1>
+        <p>Review recent contact submissions from students and parents.</p>
       </div>
     </section>
 
     <section class="section section-alt">
       <div class="container admin-shell">
         <nav class="card admin-subnav" aria-label="Admin sections">
-          <a href="/admin" class="admin-subnav-link active">Dashboard</a>
+          <a href="/admin" class="admin-subnav-link">Dashboard</a>
           <a href="/admin/contact" class="admin-subnav-link">Contact</a>
           <a href="/admin/hostels" class="admin-subnav-link">Hostels</a>
           <a href="/admin/gallery" class="admin-subnav-link">Main Gallery</a>
-          <a href="/admin/enquiries" class="admin-subnav-link">Enquiries</a>
+          <a href="/admin/enquiries" class="admin-subnav-link active">Enquiries</a>
           <a href="/admin/users" class="admin-subnav-link">Admins</a>
           <button id="adminLogoutBtn" type="button" class="btn btn-outline admin-logout-btn">Logout</button>
         </nav>
 
         <div class="admin-content-stack">
           <div class="card admin-card">
-          <h4>Admin Login</h4>
-          <form id="adminLoginForm" class="admin-form">
-            <label for="adminEmailInput">Admin email</label>
-            <input id="adminEmailInput" name="email" type="email" placeholder="Enter admin email" required />
-            <label for="adminKeyInput">Password</label>
-            <input id="adminKeyInput" name="password" type="password" placeholder="Enter password" required />
-            <button type="submit" class="btn btn-primary">Login & Unlock Editor</button>
-            <p id="adminLoginStatus" class="status-text" aria-live="polite">Login once, then open any section below.</p>
-          </form>
-        </div>
+            <h4>Admin Login</h4>
+            <form id="adminLoginForm" class="admin-form">
+              <label for="adminEmailInput">Admin email</label>
+              <input id="adminEmailInput" name="email" type="email" placeholder="Enter admin email" required />
+              <label for="adminKeyInput">Password</label>
+              <input id="adminKeyInput" name="password" type="password" placeholder="Enter password" required />
+              <button type="submit" class="btn btn-primary">Login & Unlock Editor</button>
+              <p id="adminLoginStatus" class="status-text" aria-live="polite">Login with your backend admin account.</p>
+            </form>
+          </div>
 
-          <div class="admin-grid-cards" id="adminEditor" hidden>
-            <a class="card admin-quick-card" href="/admin/contact">
-              <h5>Contact Settings</h5>
-              <p>Update phone, WhatsApp, email, and address.</p>
-            </a>
-            <a class="card admin-quick-card" href="/admin/hostels">
-              <h5>Hostel Content</h5>
-              <p>Edit hostel details, room types, pricing, and media.</p>
-            </a>
-            <a class="card admin-quick-card" href="/admin/gallery">
-              <h5>Main Gallery</h5>
-              <p>Manage homepage gallery images with add/remove controls.</p>
-            </a>
-            <a class="card admin-quick-card" href="/admin/enquiries">
-              <h5>Recent Enquiries</h5>
-              <p>Review latest submitted contact requests.</p>
-            </a>
-            <a class="card admin-quick-card" href="/admin/users">
-              <h5>Admin Users</h5>
-              <p>Create and manage additional admin accounts.</p>
-            </a>
+          <div class="card admin-card" id="enquiryEditor" hidden>
+            <h4 class="admin-card-title">Recent Enquiries</h4>
+            <p class="admin-card-subtitle">Latest contact queries submitted from the website.</p>
+            <div class="action-row">
+              <button type="button" id="refreshEnquiriesBtn" class="btn btn-outline">Refresh Queries</button>
+            </div>
+            <p class="status-text" id="enquiryStatus" aria-live="polite"></p>
+            <div id="enquiriesList" class="enquiry-list"></div>
           </div>
         </div>
       </div>

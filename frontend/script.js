@@ -121,8 +121,31 @@ let contactDetails = deepClone(defaultContactDetails);
 let hostelsData = deepClone(defaultHostelsData);
 let mainGalleryData = deepClone(defaultMainGallery);
 let mainGalleryRecordIds = [];
+const ADMIN_TOKEN_STORAGE_KEY = "hostelAdminToken";
 let adminToken = "";
 const apiHostelsByKey = {};
+
+function setAdminToken(token) {
+  const normalizedToken = String(token || "").trim();
+  adminToken = normalizedToken;
+
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  if (normalizedToken) {
+    window.localStorage.setItem(ADMIN_TOKEN_STORAGE_KEY, normalizedToken);
+  } else {
+    window.localStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
+  }
+}
+
+function restoreAdminToken() {
+  if (typeof window === "undefined") {
+    return;
+  }
+  setAdminToken(window.localStorage.getItem(ADMIN_TOKEN_STORAGE_KEY) || "");
+}
 
 function saveHostelsData() {}
 
@@ -821,6 +844,51 @@ const mainGalleryFiles = document.getElementById("mainGalleryFiles");
 const mainGalleryFilesInfo = document.getElementById("mainGalleryFilesInfo");
 const resetMainGalleryBtn = document.getElementById("resetMainGalleryBtn");
 const mainGalleryStatus = document.getElementById("mainGalleryStatus");
+const adminLogoutBtn = document.getElementById("adminLogoutBtn");
+
+function unlockAdminSections() {
+  adminEditor?.removeAttribute("hidden");
+  hostelEditor?.removeAttribute("hidden");
+  galleryEditor?.removeAttribute("hidden");
+  enquiryEditor?.removeAttribute("hidden");
+  adminUserEditor?.removeAttribute("hidden");
+}
+
+async function hydrateUnlockedAdminData() {
+  await Promise.all([hydrateContactDetailsFromApi(), hydrateHostelsFromApi(), hydrateGalleryFromApi()]);
+  await Promise.all([hydrateEnquiriesFromApi(), hydrateAdminsFromApi()]);
+
+  fillAdminContactForm();
+  if (adminHostelSelect) {
+    fillHostelForm(adminHostelSelect.value);
+  }
+  fillMainGalleryForm();
+}
+
+async function tryAutoUnlockAdmin() {
+  if (document.body?.dataset?.page !== "admin") {
+    return;
+  }
+
+  restoreAdminToken();
+  if (!adminToken) {
+    return;
+  }
+
+  unlockAdminSections();
+  if (adminLoginStatus) {
+    adminLoginStatus.textContent = "Session restored. Editor unlocked.";
+  }
+
+  try {
+    await hydrateUnlockedAdminData();
+  } catch (_error) {
+    setAdminToken("");
+    if (adminLoginStatus) {
+      adminLoginStatus.textContent = "Session expired. Please login again.";
+    }
+  }
+}
 
 function getBuilderValues(containerSelector, inputSelector) {
   const rows = document.querySelectorAll(containerSelector);
@@ -1363,7 +1431,8 @@ adminLoginForm?.addEventListener("submit", async (event) => {
       body: JSON.stringify({ email, password })
     });
     const result = await response.json();
-    adminToken = String(result.token || "").trim();
+    const nextToken = String(result.token || "").trim();
+    setAdminToken(nextToken);
 
     if (!adminToken) {
       throw new Error("Token missing from login response");
@@ -1373,26 +1442,18 @@ adminLoginForm?.addEventListener("submit", async (event) => {
       adminLoginStatus.textContent = "Login successful. DB editor unlocked.";
     }
 
-    adminEditor?.removeAttribute("hidden");
-    hostelEditor?.removeAttribute("hidden");
-    galleryEditor?.removeAttribute("hidden");
-    enquiryEditor?.removeAttribute("hidden");
-    adminUserEditor?.removeAttribute("hidden");
-
-    await Promise.all([hydrateContactDetailsFromApi(), hydrateHostelsFromApi(), hydrateGalleryFromApi()]);
-    await hydrateEnquiriesFromApi();
-    await hydrateAdminsFromApi();
-
-    fillAdminContactForm();
-    if (adminHostelSelect) {
-      fillHostelForm(adminHostelSelect.value);
-    }
-    fillMainGalleryForm();
+    unlockAdminSections();
+    await hydrateUnlockedAdminData();
   } catch (error) {
     if (adminLoginStatus) {
       adminLoginStatus.textContent = error.message || "Login failed.";
     }
   }
+});
+
+adminLogoutBtn?.addEventListener("click", () => {
+  setAdminToken("");
+  window.location.reload();
 });
 
 adminContactForm?.addEventListener("submit", async (event) => {
@@ -1689,3 +1750,4 @@ applyMainGalleryData();
 hydrateContactDetailsFromApi();
 hydrateHostelsFromApi();
 hydrateGalleryFromApi();
+tryAutoUnlockAdmin();

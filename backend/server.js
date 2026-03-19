@@ -59,6 +59,11 @@ const pageRoutes = {
   "/distance": "pages/distance.html",
   "/contact": "pages/contact.html",
   "/admin": "pages/admin.html",
+  "/admin/contact": "pages/admin-contact.html",
+  "/admin/hostels": "pages/admin-hostels.html",
+  "/admin/gallery": "pages/admin-gallery.html",
+  "/admin/enquiries": "pages/admin-enquiries.html",
+  "/admin/users": "pages/admin-users.html",
   "/elvy-stays": "pages/elvy-stays.html",
   "/hostel-praneeth1": "pages/hostel-praneeth1.html",
   "/hostel-praneeth2": "pages/hostel-praneeth2.html"
