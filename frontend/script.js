@@ -414,13 +414,14 @@ async function hydrateGalleryFromApi() {
       return;
     }
 
-    const mainImages = images
-      .filter((item) => item.is_main_gallery)
+    const mainGalleryEntries = images.filter((item) => item.is_main_gallery);
+    const galleryEntries = mainGalleryEntries.length ? mainGalleryEntries : images;
+
+    const mainImages = galleryEntries
       .map((item) => String(item.image_url || "").trim())
       .filter(Boolean);
 
-    mainGalleryRecordIds = images
-      .filter((item) => item.is_main_gallery)
+    mainGalleryRecordIds = mainGalleryEntries
       .map((item) => String(item._id || ""))
       .filter(Boolean);
 

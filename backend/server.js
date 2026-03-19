@@ -19,7 +19,26 @@ const app = express();
 const port = Number(process.env.PORT || 5000);
 const frontendRoot = path.resolve(__dirname, "../frontend");
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        baseUri: ["'self'"],
+        fontSrc: ["'self'", "https:", "data:"],
+        formAction: ["'self'"],
+        frameAncestors: ["'self'"],
+        // Allow trusted external image hosts (Cloudflare/Cloudinary/etc.).
+        imgSrc: ["'self'", "data:", "blob:", "https:"],
+        objectSrc: ["'none'"],
+        scriptSrc: ["'self'"],
+        scriptSrcAttr: ["'none'"],
+        styleSrc: ["'self'", "https:", "'unsafe-inline'"],
+        upgradeInsecureRequests: []
+      }
+    }
+  })
+);
 app.use(
   cors({
     origin: process.env.FRONTEND_ORIGIN || "*"
