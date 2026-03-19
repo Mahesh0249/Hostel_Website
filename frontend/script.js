@@ -122,6 +122,7 @@ let hostelsData = deepClone(defaultHostelsData);
 let mainGalleryData = deepClone(defaultMainGallery);
 let mainGalleryRecordIds = [];
 const ADMIN_TOKEN_STORAGE_KEY = "hostelAdminToken";
+const ADMIN_REDIRECT_STORAGE_KEY = "hostelAdminRedirectPath";
 let adminToken = "";
 const apiHostelsByKey = {};
 
@@ -145,6 +146,53 @@ function restoreAdminToken() {
     return;
   }
   setAdminToken(window.localStorage.getItem(ADMIN_TOKEN_STORAGE_KEY) || "");
+}
+
+function normalizePathname(pathname) {
+  const normalized = String(pathname || "").replace(/\/+$/, "");
+  return normalized || "/";
+}
+
+function getAdminRedirectPath() {
+  if (typeof window === "undefined") {
+    return "/admin/contact";
+  }
+
+  const stored = normalizePathname(window.localStorage.getItem(ADMIN_REDIRECT_STORAGE_KEY) || "");
+  if (stored.startsWith("/admin") && stored !== "/admin") {
+    return stored;
+  }
+
+  return "/admin/contact";
+}
+
+function clearAdminRedirectPath() {
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.localStorage.removeItem(ADMIN_REDIRECT_STORAGE_KEY);
+}
+
+function guardAdminRouteAccess() {
+  if (typeof window === "undefined" || document.body?.dataset?.page !== "admin") {
+    return false;
+  }
+
+  const currentPath = normalizePathname(window.location.pathname);
+  if (!currentPath.startsWith("/admin")) {
+    return false;
+  }
+
+  restoreAdminToken();
+
+  // Force login page first for all edit pages.
+  if (currentPath !== "/admin" && !adminToken) {
+    window.localStorage.setItem(ADMIN_REDIRECT_STORAGE_KEY, currentPath);
+    window.location.replace("/admin");
+    return true;
+  }
+
+  return false;
 }
 
 function saveHostelsData() {}
@@ -871,6 +919,10 @@ async function tryAutoUnlockAdmin() {
     return;
   }
 
+  if (guardAdminRouteAccess()) {
+    return;
+  }
+
   restoreAdminToken();
   if (!adminToken) {
     return;
@@ -1441,6 +1493,14 @@ adminLoginForm?.addEventListener("submit", async (event) => {
 
     if (adminLoginStatus) {
       adminLoginStatus.textContent = "Login successful. DB editor unlocked.";
+    }
+
+    const currentPath = normalizePathname(window.location.pathname);
+    if (currentPath === "/admin") {
+      const redirectPath = getAdminRedirectPath();
+      clearAdminRedirectPath();
+      window.location.assign(redirectPath);
+      return;
     }
 
     unlockAdminSections();
