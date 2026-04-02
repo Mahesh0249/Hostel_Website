@@ -30,11 +30,39 @@ function normalizeAccessType(value) {
   return "Limited Access";
 }
 
+function isSeedEnabled() {
+  const allowSeed = String(process.env.ALLOW_ADMIN_SEED || "").trim().toLowerCase() === "true";
+  const nodeEnv = String(process.env.NODE_ENV || "development").trim().toLowerCase();
+  return allowSeed || nodeEnv !== "production";
+}
+
+function hasPrivilegedOwnerAccess(admin) {
+  return Boolean(admin && admin.role === "admin" && admin.ownership === "Owner" && admin.access_type === "Full Access");
+}
+
+async function getRequesterAdmin(req) {
+  if (!req.user?.id) {
+    return null;
+  }
+  return Admin.findById(req.user.id);
+}
+
 async function seedAdmin(req, res) {
   const { name, email, password, ownership, access_type } = req.body;
 
+  if (!isSeedEnabled()) {
+    return res.status(403).json({
+      message: "Admin bootstrap is disabled. Set ALLOW_ADMIN_SEED=true temporarily to enable it."
+    });
+  }
+
   if (!name || !email || !password) {
     return res.status(400).json({ message: "name, email, and password are required" });
+  }
+
+  const totalAdmins = await Admin.countDocuments();
+  if (totalAdmins > 0) {
+    return res.status(409).json({ message: "Seed is one-time only. Admin already exists." });
   }
 
   const existing = await Admin.findOne({ email: email.toLowerCase().trim() });
@@ -96,6 +124,11 @@ async function login(req, res) {
 
 async function createAdmin(req, res) {
   const { name, email, password, ownership, access_type } = req.body;
+  const requester = await getRequesterAdmin(req);
+
+  if (!hasPrivilegedOwnerAccess(requester)) {
+    return res.status(403).json({ message: "Only owner with full access can create admins" });
+  }
 
   if (!name || !email || !password) {
     return res.status(400).json({ message: "name, email, and password are required" });
@@ -144,16 +177,26 @@ async function listAdmins(_req, res) {
 
 async function updateAdmin(req, res) {
   const { id } = req.params;
+  const requester = await getRequesterAdmin(req);
   const admin = await Admin.findById(id);
 
   if (!admin) {
     return res.status(404).json({ message: "Admin not found" });
   }
 
+  const isSelfUpdate = String(requester?._id || "") === String(admin._id);
+  const canManageAnyAdmin = hasPrivilegedOwnerAccess(requester);
+  if (!isSelfUpdate && !canManageAnyAdmin) {
+    return res.status(403).json({ message: "Only owner with full access can update other admins" });
+  }
+
   const nextName = req.body.name !== undefined ? String(req.body.name).trim() : admin.name;
   const nextEmail = req.body.email !== undefined ? String(req.body.email).trim().toLowerCase() : admin.email;
-  const nextOwnership = req.body.ownership !== undefined ? normalizeOwnership(req.body.ownership) : admin.ownership;
-  const nextAccessType = req.body.access_type !== undefined ? normalizeAccessType(req.body.access_type) : admin.access_type;
+  const requestedOwnership = req.body.ownership !== undefined ? normalizeOwnership(req.body.ownership) : admin.ownership;
+  const requestedAccessType = req.body.access_type !== undefined ? normalizeAccessType(req.body.access_type) : admin.access_type;
+
+  const nextOwnership = canManageAnyAdmin ? requestedOwnership : admin.ownership;
+  const nextAccessType = canManageAnyAdmin ? requestedAccessType : admin.access_type;
 
   if (!nextName || !nextEmail) {
     return res.status(400).json({ message: "name and email are required" });
@@ -205,6 +248,11 @@ async function updateAdmin(req, res) {
 
 async function deleteAdmin(req, res) {
   const { id } = req.params;
+  const requester = await getRequesterAdmin(req);
+
+  if (!hasPrivilegedOwnerAccess(requester)) {
+    return res.status(403).json({ message: "Only owner with full access can remove admins" });
+  }
 
   if (String(req.user.id) === String(id)) {
     return res.status(400).json({ message: "You cannot remove your own logged-in account" });
@@ -233,6 +281,16 @@ async function deleteAdmin(req, res) {
 
 async function transferOwnership(req, res) {
   const { id } = req.params;
+  const requester = await getRequesterAdmin(req);
+
+  if (!hasPrivilegedOwnerAccess(requester)) {
+    return res.status(403).json({ message: "Only current owner with full access can transfer ownership" });
+  }
+
+  if (String(requester?._id || "") === String(id)) {
+    return res.status(400).json({ message: "You are already the current owner" });
+  }
+
   const target = await Admin.findById(id);
 
   if (!target) {

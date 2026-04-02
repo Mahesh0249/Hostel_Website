@@ -71,6 +71,11 @@ curl -X POST http://localhost:5000/api/admin/seed \
   -d '{"name":"Owner Admin","email":"owner@example.com","password":"StrongPassword123"}'
 ```
 
+Security note:
+- `POST /api/admin/seed` is one-time only and blocked after first admin creation.
+- In production, keep `ALLOW_ADMIN_SEED=false`.
+- Temporarily set `ALLOW_ADMIN_SEED=true` only for initial bootstrap, then switch it back to `false`.
+
 Login:
 
 ```bash
