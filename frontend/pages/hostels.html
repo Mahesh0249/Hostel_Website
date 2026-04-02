@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hostels | Sai Praneeth & Elvy Student Stays</title>
+  <meta name="description" content="View room types, pricing, and details for Sai Praneeth Boys Hostel 1, Sai Praneeth Boys Hostel 2, and Elvy Stays." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body data-page="hostels">
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="/" class="brand">Sai Praneeth & Elvy Student Stays</a>
+      <button class="menu-toggle" aria-label="Toggle menu" id="menuToggle" type="button">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav" id="mainNav">
+        <a href="/" data-nav="home">Home</a>
+        <a href="/hostels" data-nav="hostels">Hostels</a>
+        <a href="/facilities" data-nav="facilities">Facilities</a>
+        <a href="/gallery" data-nav="gallery">Gallery</a>
+        <a href="/distance" data-nav="distance">Distance Finder</a>
+        <a href="/contact" data-nav="contact">Contact</a>
+      </nav>
+      <a class="btn btn-gold nav-cta" href="https://wa.me/910000000000?text=Hi%2C%20I%20want%20to%20book%20a%20room" target="_blank" rel="noopener noreferrer">Book Room on WhatsApp</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <h1>Our Hostels</h1>
+        <p>Three student-friendly properties in one locality with comfort, safety, and affordability.</p>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
+        <div class="hostel-grid" id="hostelCardsGrid">
+          <article class="card hostel-card" data-hostel-card="praneeth1">
+            <img class="hostel-card-image" src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1400&q=80" alt="Sai Praneeth Boys Hostel 1" />
+            <div class="card-body">
+              <h4 class="hostel-card-name">Sai Praneeth Boys Hostel 1</h4>
+              <p class="hostel-card-desc">Affordable shared rooms with WiFi, mess, and comfortable student living.</p>
+              <p class="price hostel-card-price">Starting from ₹4500 / month</p>
+              <div class="action-row">
+                <a class="btn btn-primary" href="/hostel-praneeth1">View Details</a>
+                <a class="btn btn-outline hostel-card-wa" href="https://wa.me/910000000000?text=Hi%2C%20I%20am%20interested%20in%20Sai%20Praneeth%20Boys%20Hostel%201" target="_blank" rel="noopener noreferrer">WhatsApp Enquiry</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card hostel-card" data-hostel-card="praneeth2">
+            <img class="hostel-card-image" src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=80" alt="Sai Praneeth Boys Hostel 2" />
+            <div class="card-body">
+              <h4 class="hostel-card-name">Sai Praneeth Boys Hostel 2</h4>
+              <p class="hostel-card-desc">Newly built hostel with upgraded rooms and attached bathrooms.</p>
+              <p class="price hostel-card-price">Starting from ₹5000 / month</p>
+              <div class="action-row">
+                <a class="btn btn-primary" href="/hostel-praneeth2">View Details</a>
+                <a class="btn btn-outline hostel-card-wa" href="https://wa.me/910000000000?text=Hi%2C%20I%20am%20interested%20in%20Sai%20Praneeth%20Boys%20Hostel%202" target="_blank" rel="noopener noreferrer">WhatsApp Enquiry</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card hostel-card" data-hostel-card="elvy">
+            <img class="hostel-card-image" src="https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1400&q=80" alt="Elvy Stays" />
+            <div class="card-body">
+              <h4 class="hostel-card-name">Elvy Stays</h4>
+              <p class="hostel-card-desc">Premium student stay with a quieter and more comfortable environment.</p>
+              <p class="price hostel-card-price">Starting from ₹6500 / month</p>
+              <div class="action-row">
+                <a class="btn btn-primary" href="/elvy-stays">View Details</a>
+                <a class="btn btn-outline hostel-card-wa" href="https://wa.me/910000000000?text=Hi%2C%20I%20am%20interested%20in%20Elvy%20Stays" target="_blank" rel="noopener noreferrer">WhatsApp Enquiry</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <h4>Sai Praneeth & Elvy Student Stays</h4>
+        <p>Trusted student accommodation group in one locality.</p>
+      </div>
+      <div>
+        <h5>Quick Links</h5>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/hostels">Hostels</a></li>
+          <li><a href="/facilities">Facilities</a></li>
+          <li><a href="/gallery">Gallery</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Contact Info</h5>
+        <p>Phone number: +91 00000 00000</p>
+        <p>Address: Locality, City, State</p>
+        <p>WhatsApp: +91 00000 00000</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../script.js"></script>
+</body>
+</html>

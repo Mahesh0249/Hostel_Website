@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Users | Sai Praneeth & Elvy Student Stays</title>
+  <meta name="description" content="Admin page for creating and viewing admin users." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body data-page="admin">
+    <header class="site-header admin-header">
+    <div class="container admin-topbar">
+      <a href="/admin" class="brand">Sai Praneeth & Elvy Admin</a>
+      <p class="admin-topbar-note">Private Content Management Area</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="section section-alt admin-section-tight">
+      <div class="container admin-shell">
+        <nav class="card admin-subnav" aria-label="Admin sections">
+          <a href="/admin" class="admin-subnav-link">Dashboard</a>
+          <a href="/admin/contact" class="admin-subnav-link">Contact</a>
+          <a href="/admin/hostels" class="admin-subnav-link">Hostels</a>
+          <a href="/admin/gallery" class="admin-subnav-link">Main Gallery</a>
+          <a href="/admin/enquiries" class="admin-subnav-link">Enquiries</a>
+          <a href="/admin/users" class="admin-subnav-link active">Admins</a>
+          <button id="adminLogoutBtn" type="button" class="btn btn-outline admin-logout-btn">Logout</button>
+        </nav>
+
+        <div class="admin-content-stack">
+          <div class="card admin-card">
+            <h4>Admin Login</h4>
+            <form id="adminLoginForm" class="admin-form">
+              <label for="adminEmailInput">Admin email</label>
+              <input id="adminEmailInput" name="email" type="email" placeholder="Enter admin email" required />
+              <label for="adminKeyInput">Password</label>
+              <input id="adminKeyInput" name="password" type="password" placeholder="Enter password" required />
+              <button type="submit" class="btn btn-primary">Login & Unlock Editor</button>
+              <p id="adminLoginStatus" class="status-text" aria-live="polite">Login with your backend admin account.</p>
+            </form>
+          </div>
+
+          <div class="card admin-card" id="adminUserEditor" hidden>
+            <h4 class="admin-card-title">Manage Admin Users</h4>
+            <p class="admin-card-subtitle">Create additional admins who can access and manage website content.</p>
+            <form id="createAdminForm" class="admin-form">
+              <input id="editAdminId" type="hidden" value="" />
+              <div class="admin-grid-2">
+                <div>
+                  <label for="newAdminName">Admin name</label>
+                  <input id="newAdminName" type="text" required />
+                </div>
+                <div>
+                  <label for="newAdminEmail">Admin email</label>
+                  <input id="newAdminEmail" type="email" required />
+                </div>
+              </div>
+              <div class="admin-grid-2">
+                <div>
+                  <label for="newAdminPassword">Password</label>
+                  <input id="newAdminPassword" type="password" minlength="8" required />
+                </div>
+                <div>
+                  <label for="newAdminPasswordConfirm">Confirm password</label>
+                  <input id="newAdminPasswordConfirm" type="password" minlength="8" required />
+                </div>
+              </div>
+              <div class="admin-grid-2">
+                <div>
+                  <label for="newAdminOwnership">Ownership</label>
+                  <select id="newAdminOwnership" required>
+                    <option value="Owner">Owner</option>
+                    <option value="Managed" selected>Managed</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="newAdminAccessType">Access Type</label>
+                  <select id="newAdminAccessType" required>
+                    <option value="Full Access">Full Access</option>
+                    <option value="Limited Access" selected>Limited Access</option>
+                  </select>
+                </div>
+              </div>
+              <div class="action-row">
+                <button id="createAdminSubmitBtn" type="submit" class="btn btn-primary">Add Admin</button>
+                <button id="cancelAdminEditBtn" type="button" class="btn btn-outline" hidden>Cancel Edit</button>
+                <button type="button" id="refreshAdminsBtn" class="btn btn-outline">Refresh Admin List</button>
+              </div>
+              <p class="status-text" id="adminUserStatus" aria-live="polite"></p>
+            </form>
+            <div id="adminsList" class="enquiry-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <h4>Sai Praneeth & Elvy Student Stays</h4>
+        <p>Trusted student accommodation group in one locality.</p>
+      </div>
+      <div>
+        <h5>Quick Links</h5>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/hostels">Hostels</a></li>
+          <li><a href="/facilities">Facilities</a></li>
+          <li><a href="/gallery">Gallery</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Contact Info</h5>
+        <p>Phone number: +91 00000 00000</p>
+        <p>Address: Locality, City, State</p>
+        <p>WhatsApp: +91 00000 00000</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../script.js"></script>
+</body>
+</html>
