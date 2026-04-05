@@ -22,6 +22,9 @@ const frontendRoot = path.resolve(__dirname, "../frontend");
 
 app.use(
   helmet({
+    referrerPolicy: {
+      policy: "strict-origin-when-cross-origin"
+    },
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
