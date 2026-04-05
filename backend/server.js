@@ -31,8 +31,17 @@ app.use(
         frameAncestors: ["'self'"],
         // Allow trusted external image hosts (Cloudflare/Cloudinary/etc.).
         imgSrc: ["'self'", "data:", "blob:", "https:"],
+        connectSrc: [
+          "'self'",
+          "https://nominatim.openstreetmap.org",
+          "https://router.project-osrm.org",
+          "https://tile.openstreetmap.org",
+          "https://a.tile.openstreetmap.org",
+          "https://b.tile.openstreetmap.org",
+          "https://c.tile.openstreetmap.org"
+        ],
         objectSrc: ["'none'"],
-        scriptSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://unpkg.com"],
         scriptSrcAttr: ["'none'"],
         styleSrc: ["'self'", "https:", "'unsafe-inline'"],
         upgradeInsecureRequests: []
