@@ -27,7 +27,6 @@
           <a href="/admin/contact" class="admin-subnav-link">Contact</a>
           <a href="/admin/hostels" class="admin-subnav-link active">Hostels</a>
           <a href="/admin/gallery" class="admin-subnav-link">Main Gallery</a>
-          <a href="/admin/enquiries" class="admin-subnav-link">Enquiries</a>
           <a href="/admin/users" class="admin-subnav-link">Admins</a>
           <button id="adminLogoutBtn" type="button" class="btn btn-outline admin-logout-btn">Logout</button>
         </nav>
@@ -78,6 +77,9 @@
                 <label for="adminHostelDescription">Hostel Details</label>
                 <textarea id="adminHostelDescription" name="description" rows="4" required></textarea>
 
+                <label for="adminHostelAddress">Hostel Address</label>
+                <textarea id="adminHostelAddress" name="address" rows="2" required></textarea>
+
                 <div class="admin-grid-2">
                   <div>
                     <label for="adminOwnership">Ownership</label>
@@ -125,11 +127,10 @@
               </div>
 
               <div class="admin-group">
-                <h5>Rooms & Availability</h5>
+                <h5>Rooms & Prices</h5>
                 <div id="roomsBuilderBody" class="builder-stack"></div>
                 <button type="button" id="addRoomRowBtn" class="btn btn-outline">Add Room Type</button>
                 <textarea id="adminRooms" name="rooms" rows="4" placeholder="3 Sharing|₹4500" required class="raw-source"></textarea>
-                <textarea id="adminAvailability" name="availability" rows="4" placeholder="3 Sharing – 2 beds available" required class="raw-source"></textarea>
               </div>
 
               <div class="admin-group">

@@ -1,5 +1,6 @@
 :root {
   --primary: #d9072a;
+  --primary-rgb: 217, 7, 42;
   --accent: #d9072a;
   --bg: #ffffff;
   --card: #ffffff;
@@ -19,7 +20,7 @@ html {
 
 body {
   margin: 0;
-  font-family: "Inter", sans-serif;
+  font-family: "Segoe UI", "Trebuchet MS", "Helvetica Neue", Arial, sans-serif;
   background: #ffffff;
   color: var(--text);
   line-height: 1.6;
@@ -88,6 +89,14 @@ img {
   border-radius: 18px;
 }
 
+.site-header .brand,
+.site-header .nav a,
+.site-header .nav-cta,
+.admin-subnav-link,
+.admin-topbar-note {
+  font-family: Cambria, "Times New Roman", serif;
+}
+
 .nav-wrap {
   min-height: 84px;
   display: flex;
@@ -102,7 +111,7 @@ img {
   font-weight: 800;
   color: var(--text);
   text-decoration: none;
-  font-size: 1.03rem;
+  font-size: 1.1rem;
   line-height: 1.2;
   padding-bottom: 2px;
 }
@@ -117,6 +126,7 @@ img {
   text-decoration: none;
   color: var(--text);
   font-weight: 500;
+  font-size: 1.23rem;
 }
 
 .nav a:hover,
@@ -140,26 +150,6 @@ img {
   margin: 5px 0;
 }
 
-body[data-page="home"] .site-header {
-  background: rgba(61, 70, 86, 0.58);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
-}
-
-body[data-page="home"] .brand,
-body[data-page="home"] .nav a {
-  color: #ffffff;
-}
-
-body[data-page="home"] .nav a:hover,
-body[data-page="home"] .nav a.active {
-  color: #ffffff;
-  opacity: 0.86;
-}
-
-body[data-page="home"] .menu-toggle span {
-  background: #ffffff;
-}
-
 .btn {
   border: none;
   border-radius: 999px;
@@ -181,7 +171,7 @@ body[data-page="home"] .menu-toggle span {
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(155, 28, 49, 0.24);
+  box-shadow: 0 8px 20px rgba(var(--primary-rgb), 0.24);
 }
 
 .btn-outline {
@@ -191,7 +181,7 @@ body[data-page="home"] .menu-toggle span {
 }
 
 .btn-outline:hover {
-  background: rgba(155, 28, 49, 0.08);
+  background: rgba(var(--primary-rgb), 0.08);
 }
 
 .btn-gold {
@@ -203,7 +193,7 @@ body[data-page="home"] .menu-toggle span {
 .btn-gold:hover {
   transform: translateY(-1px);
   background: rgba(217, 7, 42, 0.1);
-  box-shadow: 0 8px 20px rgba(155, 28, 49, 0.24);
+  box-shadow: 0 8px 20px rgba(var(--primary-rgb), 0.24);
 }
 
 .hero {
@@ -223,7 +213,7 @@ body[data-page="home"] .menu-toggle span {
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(120deg, rgba(31, 41, 55, 0.74), rgba(155, 28, 49, 0.56));
+  background: linear-gradient(120deg, rgba(31, 41, 55, 0.74), rgba(var(--primary-rgb), 0.56));
 }
 
 .hero-content {
@@ -373,6 +363,12 @@ body[data-page="contact"] .contact-layout {
   color: var(--primary) !important;
 }
 
+.hostel-card-address {
+  margin: 0.35rem 0 0;
+  color: #475569;
+  font-weight: 500;
+}
+
 .action-row {
   margin-top: 0.8rem;
   display: flex;
@@ -507,7 +503,7 @@ select {
 
 input:focus,
 textarea:focus {
-  outline: 2px solid rgba(155, 28, 49, 0.2);
+  outline: 2px solid rgba(var(--primary-rgb), 0.2);
   border-color: var(--primary);
 }
 
@@ -515,8 +511,8 @@ textarea:focus {
   margin-top: 1rem;
   padding: 1rem;
   border-radius: 12px;
-  background: rgba(155, 28, 49, 0.07);
-  border: 1px solid rgba(155, 28, 49, 0.18);
+  background: rgba(var(--primary-rgb), 0.07);
+  border: 1px solid rgba(var(--primary-rgb), 0.18);
 }
 
 .distance-result p,
@@ -534,7 +530,7 @@ textarea:focus {
 
 .map-surface {
   min-height: 220px;
-  border: 2px dashed rgba(155, 28, 49, 0.3);
+  border: 2px dashed rgba(var(--primary-rgb), 0.3);
   border-radius: 14px;
   display: grid;
   place-items: center;
@@ -605,7 +601,7 @@ textarea:focus {
 }
 
 .detail-hero .hero-overlay {
-  background: linear-gradient(120deg, rgba(31, 41, 55, 0.66), rgba(155, 28, 49, 0.52));
+  background: linear-gradient(120deg, rgba(31, 41, 55, 0.66), rgba(var(--primary-rgb), 0.52));
 }
 
 .detail-hero-content {
@@ -622,7 +618,7 @@ textarea:focus {
 
 .detail-grid {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 
@@ -654,8 +650,8 @@ textarea:focus {
 
 .availability-list {
   border-radius: 12px;
-  background: rgba(155, 28, 49, 0.07);
-  border: 1px solid rgba(155, 28, 49, 0.18);
+  background: rgba(var(--primary-rgb), 0.07);
+  border: 1px solid rgba(var(--primary-rgb), 0.18);
   padding: 1rem;
 }
 
@@ -723,7 +719,7 @@ textarea:focus {
 }
 
 .admin-form input[type="file"] {
-  border: 1px dashed rgba(155, 28, 49, 0.25);
+  border: 1px dashed rgba(var(--primary-rgb), 0.25);
   padding: 0.65rem;
 }
 
@@ -763,8 +759,8 @@ textarea:focus {
   width: fit-content;
   padding: 0.45rem 0.65rem;
   border-radius: 999px;
-  background: rgba(155, 28, 49, 0.08);
-  border: 1px solid rgba(155, 28, 49, 0.2);
+  background: rgba(var(--primary-rgb), 0.08);
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
 }
 
 .builder-chip button,
@@ -883,12 +879,12 @@ textarea:focus {
 
 .admin-hero {
   background: radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.35), transparent 36%),
-    radial-gradient(circle at 90% 12%, rgba(155, 28, 49, 0.18), transparent 32%);
+    radial-gradient(circle at 90% 12%, rgba(var(--primary-rgb), 0.18), transparent 32%);
 }
 
 .admin-header {
-  background: rgba(109, 17, 33, 0.96);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(31, 41, 55, 0.12);
 }
 
 .admin-topbar {
@@ -900,12 +896,12 @@ textarea:focus {
 }
 
 .admin-header .brand {
-  color: #fff;
+  color: var(--text);
 }
 
 .admin-topbar-note {
   margin: 0;
-  color: #f7e9ec;
+  color: var(--muted);
   font-weight: 600;
   font-size: 0.92rem;
 }
@@ -949,7 +945,7 @@ textarea:focus {
 }
 
 .admin-subnav-link:hover {
-  background: rgba(155, 28, 49, 0.08);
+  background: rgba(var(--primary-rgb), 0.08);
   color: var(--primary);
 }
 
@@ -977,7 +973,7 @@ textarea:focus {
   display: block;
   text-decoration: none;
   padding: 1.1rem;
-  border: 1px solid rgba(155, 28, 49, 0.12);
+  border: 1px solid rgba(var(--primary-rgb), 0.12);
 }
 
 .admin-quick-card h5 {
@@ -992,8 +988,8 @@ textarea:focus {
 }
 
 .site-footer {
-  background: #6d1121;
-  color: #f7e9ec;
+  background: var(--primary);
+  color: #ffffff;
   padding: 2.5rem 0;
 }
 
@@ -1010,7 +1006,7 @@ textarea:focus {
 }
 
 .site-footer a {
-  color: #f7e9ec;
+  color: #ffffff;
   text-decoration: none;
 }
 

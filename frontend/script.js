@@ -27,6 +27,7 @@ const defaultHostelsData = {
   praneeth1: {
     name: "Sai Praneeth Boys Hostel 1",
     tagline: "Affordable shared rooms with WiFi, mess, and comfortable student living.",
+    address: "Locality, City, State",
     startingPrice: "Starting from ₹4500 / month",
     ownership: "Private",
     accessType: "Boys",
@@ -60,6 +61,7 @@ const defaultHostelsData = {
   praneeth2: {
     name: "Sai Praneeth Boys Hostel 2",
     tagline: "Newly built hostel with upgraded rooms and attached bathrooms.",
+    address: "Locality, City, State",
     startingPrice: "Starting from ₹5000 / month",
     ownership: "Private",
     accessType: "Boys",
@@ -93,6 +95,7 @@ const defaultHostelsData = {
   elvy: {
     name: "Elvy Stays",
     tagline: "Premium student stay with a quieter and more comfortable environment.",
+    address: "Locality, City, State",
     startingPrice: "Starting from ₹6500 / month",
     ownership: "Private",
     accessType: "Boys",
@@ -355,14 +358,11 @@ function mapApiHostelToFrontend(hostel) {
     }))
     : [];
 
-  const availability = Array.isArray(hostel.rooms)
-    ? hostel.rooms.map((room) => `${room.type} – ${room.available_beds || "Full"}`)
-    : [];
-
   return {
     id: String(hostel._id || "").trim(),
     name: String(hostel.name || "").trim(),
     tagline: String(hostel.tagline || "").trim(),
+    address: String(hostel.location || contactDetails.address || defaultContactDetails.address).trim(),
     startingPrice: String(hostel.price_start || "").trim(),
     ownership: String(hostel.ownership || "Private").trim(),
     accessType: String(hostel.access_type || "Boys").trim(),
@@ -373,7 +373,7 @@ function mapApiHostelToFrontend(hostel) {
     longitude: Number.isFinite(Number(hostel.longitude)) ? Number(hostel.longitude) : null,
     facilities: Array.isArray(hostel.facilities) ? hostel.facilities : [],
     rooms,
-    availability,
+    availability: [],
     gallery: Array.isArray(hostel.gallery_urls) ? hostel.gallery_urls : []
   };
 }
@@ -607,6 +607,7 @@ function applyHostelCardsData() {
     const image = card.querySelector(".hostel-card-image");
     const name = card.querySelector(".hostel-card-name");
     const desc = card.querySelector(".hostel-card-desc");
+    const address = card.querySelector(".hostel-card-address");
     const price = card.querySelector(".hostel-card-price");
     const wa = card.querySelector(".hostel-card-wa");
 
@@ -619,6 +620,9 @@ function applyHostelCardsData() {
     }
     if (desc) {
       desc.textContent = data.tagline;
+    }
+    if (address) {
+      address.textContent = `Address: ${data.address || contactDetails.address}`;
     }
     if (price) {
       price.textContent = data.startingPrice;
@@ -1090,10 +1094,6 @@ const adminLoginStatus = document.getElementById("adminLoginStatus");
 const adminEditor = document.getElementById("adminEditor");
 const hostelEditor = document.getElementById("hostelEditor");
 const galleryEditor = document.getElementById("galleryEditor");
-const enquiryEditor = document.getElementById("enquiryEditor");
-const refreshEnquiriesBtn = document.getElementById("refreshEnquiriesBtn");
-const enquiryStatus = document.getElementById("enquiryStatus");
-const enquiriesList = document.getElementById("enquiriesList");
 const adminUserEditor = document.getElementById("adminUserEditor");
 const createAdminForm = document.getElementById("createAdminForm");
 const newAdminName = document.getElementById("newAdminName");
@@ -1124,11 +1124,11 @@ const adminHostelName = document.getElementById("adminHostelName");
 const adminHostelTagline = document.getElementById("adminHostelTagline");
 const adminHostelPrice = document.getElementById("adminHostelPrice");
 const adminHostelDescription = document.getElementById("adminHostelDescription");
+const adminHostelAddress = document.getElementById("adminHostelAddress");
 const adminOwnership = document.getElementById("adminOwnership");
 const adminAccessType = document.getElementById("adminAccessType");
 const adminFacilities = document.getElementById("adminFacilities");
 const adminRooms = document.getElementById("adminRooms");
-const adminAvailability = document.getElementById("adminAvailability");
 const adminCardImage = document.getElementById("adminCardImage");
 const adminHeroImage = document.getElementById("adminHeroImage");
 const adminGalleryUrls = document.getElementById("adminGalleryUrls");
@@ -1183,13 +1183,12 @@ function unlockAdminSections() {
   adminEditor?.removeAttribute("hidden");
   hostelEditor?.removeAttribute("hidden");
   galleryEditor?.removeAttribute("hidden");
-  enquiryEditor?.removeAttribute("hidden");
   adminUserEditor?.removeAttribute("hidden");
 }
 
 async function hydrateUnlockedAdminData() {
   await Promise.all([hydrateContactDetailsFromApi(), hydrateHostelsFromApi(), hydrateGalleryFromApi()]);
-  await Promise.all([hydrateEnquiriesFromApi(), hydrateAdminsFromApi()]);
+  await hydrateAdminsFromApi();
 
   fillAdminContactForm();
   if (adminHostelSelect) {
@@ -1313,16 +1312,11 @@ function addRoomRow(data = {}) {
   priceInput.placeholder = "Price (e.g., ₹4500)";
   priceInput.value = String(data.price || "").trim();
 
-  const bedsInput = document.createElement("input");
-  bedsInput.type = "text";
-  bedsInput.placeholder = "Availability (e.g., 2 beds available)";
-  bedsInput.value = String(data.available || "").trim() || "Full";
-
   const removeBtn = document.createElement("button");
   removeBtn.type = "button";
   removeBtn.textContent = "✕";
 
-  [typeInput, priceInput, bedsInput].forEach((input) => {
+  [typeInput, priceInput].forEach((input) => {
     input.addEventListener("input", syncRoomSources);
   });
 
@@ -1331,7 +1325,7 @@ function addRoomRow(data = {}) {
     syncRoomSources();
   });
 
-  row.append(typeInput, priceInput, bedsInput, removeBtn);
+  row.append(typeInput, priceInput, removeBtn);
   roomsBuilderBody.appendChild(row);
   syncRoomSources();
 }
@@ -1343,34 +1337,30 @@ function setRoomsBuilder(rooms) {
   roomsBuilderBody.innerHTML = "";
   rooms.forEach((room) => addRoomRow(room));
   if (!rooms.length) {
-    addRoomRow({ type: "", price: "", available: "Full" });
+    addRoomRow({ type: "", price: "" });
   }
   syncRoomSources();
 }
 
 function syncRoomSources() {
-  if (!adminRooms || !adminAvailability) {
+  if (!adminRooms) {
     return;
   }
 
   const rows = Array.from(document.querySelectorAll("#roomsBuilderBody .builder-row"));
   const roomLines = [];
-  const availabilityLines = [];
 
   rows.forEach((row) => {
     const inputs = row.querySelectorAll("input");
     const roomType = String(inputs[0]?.value || "").trim();
     const roomPrice = String(inputs[1]?.value || "").trim();
-    const roomAvailable = String(inputs[2]?.value || "").trim();
 
     if (roomType && roomPrice) {
       roomLines.push(`${roomType}|${roomPrice}`);
-      availabilityLines.push(`${roomType} – ${roomAvailable || "Full"}`);
     }
   });
 
   adminRooms.value = roomLines.join("\n");
-  adminAvailability.value = availabilityLines.join("\n");
 }
 
 function addUrlRow(container, value, onSync) {
@@ -1543,6 +1533,9 @@ function fillHostelForm(hostelKey) {
   adminHostelTagline.value = data.tagline;
   adminHostelPrice.value = data.startingPrice;
   adminHostelDescription.value = data.description;
+  if (adminHostelAddress) {
+    adminHostelAddress.value = data.address || contactDetails.address;
+  }
   if (adminOwnership) {
     adminOwnership.value = data.ownership || "Private";
   }
@@ -1551,22 +1544,9 @@ function fillHostelForm(hostelKey) {
   }
   setFacilitiesBuilder(data.facilities || []);
 
-  const availabilityMap = {};
-  (data.availability || []).forEach((line) => {
-    const raw = String(line || "").trim();
-    if (!raw) {
-      return;
-    }
-    const parts = raw.includes("–") ? raw.split("–") : raw.split("-");
-    if (parts.length > 1) {
-      availabilityMap[String(parts[0]).trim().toLowerCase()] = parts.slice(1).join("-").trim();
-    }
-  });
-
   const roomRows = (data.rooms || []).map((room) => ({
     type: room.type,
-    price: room.price,
-    available: availabilityMap[String(room.type || "").trim().toLowerCase()] || "Full"
+    price: room.price
   }));
   setRoomsBuilder(roomRows);
 
@@ -1587,62 +1567,6 @@ function formatEnquiryTime(value) {
     return "Unknown time";
   }
   return date.toLocaleString();
-}
-
-function renderEnquiries(enquiries) {
-  if (!enquiriesList) {
-    return;
-  }
-
-  if (!enquiries.length) {
-    enquiriesList.innerHTML = "<p class=\"helper-text\">No enquiries yet.</p>";
-    return;
-  }
-
-  enquiriesList.innerHTML = enquiries
-    .map(
-      (enquiry) => `
-      <article class="enquiry-card">
-        <div class="enquiry-head">
-          <p class="enquiry-name">${escapeHtml(enquiry.name || "Unknown")}</p>
-          <p class="enquiry-time">${escapeHtml(formatEnquiryTime(enquiry.createdAt))}</p>
-        </div>
-        <p class="enquiry-meta"><strong>Hostel:</strong> ${escapeHtml(enquiry.hostel || "General Enquiry")}</p>
-        <p class="enquiry-meta"><strong>Phone:</strong> ${escapeHtml(enquiry.phone || "-")}</p>
-        <p class="enquiry-message"><strong>Message:</strong> ${escapeHtml(enquiry.message || "-")}</p>
-      </article>
-    `
-    )
-    .join("");
-}
-
-async function hydrateEnquiriesFromApi() {
-  if (!adminToken) {
-    return;
-  }
-
-  try {
-    if (enquiryStatus) {
-      enquiryStatus.textContent = "Loading enquiries...";
-    }
-
-    const response = await apiFetchWithRetry("/api/contact?limit=100", {
-      method: "GET",
-      headers: {
-        ...getAuthHeaders()
-      }
-    });
-    const enquiries = await response.json();
-    renderEnquiries(Array.isArray(enquiries) ? enquiries : []);
-
-    if (enquiryStatus) {
-      enquiryStatus.textContent = `Showing ${Array.isArray(enquiries) ? enquiries.length : 0} enquiry(s).`;
-    }
-  } catch (error) {
-    if (enquiryStatus) {
-      enquiryStatus.textContent = error.message || "Failed to load enquiries.";
-    }
-  }
 }
 
 function renderAdmins(admins) {
@@ -1927,10 +1851,6 @@ createAdminForm?.addEventListener("submit", async (event) => {
   }
 });
 
-refreshEnquiriesBtn?.addEventListener("click", () => {
-  hydrateEnquiriesFromApi();
-});
-
 adminLoginForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const email = String(adminEmailInput?.value || "").trim();
@@ -2073,7 +1993,6 @@ hostelDataForm?.addEventListener("submit", async (event) => {
   const hostelRecord = apiHostelsByKey[key];
   const urlGallery = parseImageUrls(adminGalleryUrls?.value || "");
   const facilities = parseLineList(adminFacilities?.value || "");
-  const availabilityLines = parseLineList(adminAvailability?.value || "");
   const roomsInput = parseRooms(adminRooms?.value || "");
 
   try {
@@ -2096,13 +2015,16 @@ hostelDataForm?.addEventListener("submit", async (event) => {
     const mergedRooms = (roomsInput.length ? roomsInput : existing.rooms).map((room) => ({
       type: room.type,
       price: room.price,
-      available_beds: getAvailableBedsByRoomType(availabilityLines, room.type, "Full")
+      available_beds:
+        (existing.rooms || []).find((existingRoom) => String(existingRoom.type || "") === String(room.type || ""))
+          ?.available_beds || "Full"
     }));
 
     const payload = {
       name: adminHostelName?.value.trim() || existing.name,
       tagline: adminHostelTagline?.value.trim() || existing.tagline,
       price_start: adminHostelPrice?.value.trim() || existing.startingPrice,
+      location: adminHostelAddress?.value.trim() || existing.address || contactDetails.address,
       ownership: adminOwnership?.value.trim() || existing.ownership || "Private",
       access_type: adminAccessType?.value.trim() || existing.accessType || "Boys",
       description: adminHostelDescription?.value.trim() || existing.description,
