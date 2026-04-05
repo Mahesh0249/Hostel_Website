@@ -7,6 +7,32 @@ const hostelKeyToSlug = {
   elvy: "elvy-stays"
 };
 
+const fallbackHostelCoordinatesBySlug = {
+  "sai-praneeth-boys-hostel-1": {
+    latitude: 16.48394726914612,
+    longitude: 80.68697619534079
+  },
+  "sai-praneeth-boys-hostel-2": {
+    latitude: 16.485739473366305,
+    longitude: 80.68799956600591
+  },
+  "elvy-stays": {
+    latitude: 16.483126283484175,
+    longitude: 80.69665525497054
+  }
+};
+
+function resolveHostelCoordinates(hostel) {
+  if (Number.isFinite(hostel?.latitude) && Number.isFinite(hostel?.longitude)) {
+    return {
+      latitude: hostel.latitude,
+      longitude: hostel.longitude
+    };
+  }
+
+  return fallbackHostelCoordinatesBySlug[String(hostel?.slug || "").toLowerCase()] || null;
+}
+
 async function findHostel({ hostelId, hostelKey, hostelSlug }) {
   if (hostelId) {
     return Hostel.findById(hostelId);
@@ -39,7 +65,8 @@ async function getHostelDistance(req, res) {
     return res.status(404).json({ message: "Hostel not found for distance calculation" });
   }
 
-  if (!Number.isFinite(hostel.latitude) || !Number.isFinite(hostel.longitude)) {
+  const hostelCoordinates = resolveHostelCoordinates(hostel);
+  if (!hostelCoordinates) {
     return res.status(400).json({
       message: "Selected hostel does not have coordinates configured"
     });
@@ -47,15 +74,15 @@ async function getHostelDistance(req, res) {
 
   const origin = await geocodeAddress(queryText);
   const destination = {
-    latitude: hostel.latitude,
-    longitude: hostel.longitude
+    latitude: hostelCoordinates.latitude,
+    longitude: hostelCoordinates.longitude
   };
 
   const route = await getDrivingDistance(origin, destination);
 
   const osmDirectionsUrl =
     `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=` +
-    `${encodeURIComponent(`${origin.latitude},${origin.longitude};${hostel.latitude},${hostel.longitude}`)}`;
+    `${encodeURIComponent(`${origin.latitude},${origin.longitude};${hostelCoordinates.latitude},${hostelCoordinates.longitude}`)}`;
 
   return res.json({
     hostel: {
@@ -63,8 +90,8 @@ async function getHostelDistance(req, res) {
       name: hostel.name,
       slug: hostel.slug,
       location: hostel.location,
-      latitude: hostel.latitude,
-      longitude: hostel.longitude
+      latitude: hostelCoordinates.latitude,
+      longitude: hostelCoordinates.longitude
     },
     origin: {
       input: queryText,

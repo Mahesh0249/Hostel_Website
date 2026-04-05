@@ -1089,7 +1089,17 @@ function haversineDistanceKm(lat1, lon1, lat2, lon2) {
 }
 
 async function geocodeLocationFallback(locationText) {
-  const endpoint = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(locationText)}`;
+  const params = new URLSearchParams({
+    format: "jsonv2",
+    limit: "1",
+    countrycodes: "in",
+    bounded: "1",
+    // Bounding box around Andhra Pradesh region to reduce wrong-country matches.
+    viewbox: "76.5,19.5,85.5,12.0",
+    q: String(locationText || "").trim()
+  });
+
+  const endpoint = `https://nominatim.openstreetmap.org/search?${params.toString()}`;
   const response = await fetch(endpoint, {
     headers: {
       Accept: "application/json"
@@ -1139,6 +1149,10 @@ async function fallbackDistanceEstimate(location, selectedHostelKey, selectedHos
     const origin = await geocodeLocationFallback(location);
     const straightDistanceKm = haversineDistanceKm(origin.latitude, origin.longitude, latitude, longitude);
     const estimatedRoadDistanceKm = straightDistanceKm * 1.2;
+
+    if (!Number.isFinite(estimatedRoadDistanceKm) || estimatedRoadDistanceKm > 250) {
+      throw new Error("Location is too far from the selected hostel. Please enter a nearby landmark.");
+    }
 
     distanceResult.innerHTML = `
       <p><strong>${escapeHtml(selectedHostelName)}</strong></p>
