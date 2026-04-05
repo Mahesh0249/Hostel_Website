@@ -742,11 +742,175 @@ const distanceHostelSelect = document.getElementById("distanceHostelSelect");
 const locationInput = document.getElementById("locationInput");
 const distanceResult = document.getElementById("distanceResult");
 const mapLink = document.getElementById("mapLink");
-const distanceMapFrame = document.getElementById("distanceMapFrame");
+const distanceMapCanvas = document.getElementById("distanceLeafletMap");
 const distanceOverlay = document.querySelector(".distance-overlay");
 const distanceMapShell = document.querySelector(".distance-map-shell");
 const distanceDragHandle = document.getElementById("distanceDragHandle");
 const distanceTogglePanel = document.getElementById("distanceTogglePanel");
+
+let distanceLeafletMap = null;
+let distanceHostelMarker = null;
+let distanceOriginMarker = null;
+let distanceRouteLine = null;
+
+function ensureDistanceMapReady() {
+  if (!distanceMapCanvas || typeof window.L === "undefined") {
+    return false;
+  }
+
+  if (distanceLeafletMap) {
+    return true;
+  }
+
+  distanceLeafletMap = window.L.map(distanceMapCanvas, {
+    zoomControl: true,
+    attributionControl: true
+  }).setView([16.484, 80.688], 13);
+
+  window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap contributors"
+  }).addTo(distanceLeafletMap);
+
+  return true;
+}
+
+function getHostelCoordinates(hostelKey) {
+  const apiHostel = apiHostelsByKey[hostelKey];
+  const fallbackHostel = hostelsData[hostelKey] || {};
+
+  const latitude = Number.isFinite(apiHostel?.latitude)
+    ? Number(apiHostel.latitude)
+    : (Number.isFinite(fallbackHostel.latitude) ? Number(fallbackHostel.latitude) : null);
+  const longitude = Number.isFinite(apiHostel?.longitude)
+    ? Number(apiHostel.longitude)
+    : (Number.isFinite(fallbackHostel.longitude) ? Number(fallbackHostel.longitude) : null);
+
+  if (latitude === null || longitude === null) {
+    return null;
+  }
+
+  return { latitude, longitude };
+}
+
+function getHostelDisplayName(hostelKey) {
+  return String(hostelsData[hostelKey]?.name || "Selected hostel").trim();
+}
+
+function clearDistanceRouteArtifacts() {
+  if (!distanceLeafletMap) {
+    return;
+  }
+
+  if (distanceOriginMarker) {
+    distanceLeafletMap.removeLayer(distanceOriginMarker);
+    distanceOriginMarker = null;
+  }
+
+  if (distanceRouteLine) {
+    distanceLeafletMap.removeLayer(distanceRouteLine);
+    distanceRouteLine = null;
+  }
+}
+
+function buildOsmDirectionsUrl(origin, destination) {
+  return (
+    "https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=" +
+    encodeURIComponent(`${origin.latitude},${origin.longitude};${destination.latitude},${destination.longitude}`)
+  );
+}
+
+function focusMapOnHostel(hostelKey) {
+  if (!ensureDistanceMapReady()) {
+    return;
+  }
+
+  const coords = getHostelCoordinates(hostelKey);
+  const hostelName = getHostelDisplayName(hostelKey);
+
+  clearDistanceRouteArtifacts();
+
+  if (distanceHostelMarker) {
+    distanceLeafletMap.removeLayer(distanceHostelMarker);
+    distanceHostelMarker = null;
+  }
+
+  if (!coords) {
+    distanceLeafletMap.setView([16.484, 80.688], 13);
+    if (mapLink) {
+      mapLink.hidden = true;
+    }
+    return;
+  }
+
+  distanceHostelMarker = window.L.marker([coords.latitude, coords.longitude])
+    .addTo(distanceLeafletMap)
+    .bindPopup(hostelName)
+    .openPopup();
+
+  distanceLeafletMap.setView([coords.latitude, coords.longitude], 15);
+
+  if (mapLink) {
+    mapLink.href = `https://www.openstreetmap.org/?mlat=${coords.latitude}&mlon=${coords.longitude}#map=15/${coords.latitude}/${coords.longitude}`;
+    mapLink.hidden = false;
+  }
+}
+
+function renderRouteOnMap(hostelKey, origin, routeCoordinates = []) {
+  if (!ensureDistanceMapReady()) {
+    return;
+  }
+
+  const destination = getHostelCoordinates(hostelKey);
+  const hostelName = getHostelDisplayName(hostelKey);
+  if (!destination) {
+    return;
+  }
+
+  if (distanceHostelMarker) {
+    distanceLeafletMap.removeLayer(distanceHostelMarker);
+  }
+  if (distanceOriginMarker) {
+    distanceLeafletMap.removeLayer(distanceOriginMarker);
+  }
+  if (distanceRouteLine) {
+    distanceLeafletMap.removeLayer(distanceRouteLine);
+  }
+
+  distanceHostelMarker = window.L.marker([destination.latitude, destination.longitude])
+    .addTo(distanceLeafletMap)
+    .bindPopup(hostelName);
+
+  distanceOriginMarker = window.L.marker([origin.latitude, origin.longitude])
+    .addTo(distanceLeafletMap)
+    .bindPopup("Your location");
+
+  const sanitizedRoute = Array.isArray(routeCoordinates)
+    ? routeCoordinates
+      .filter((point) => Array.isArray(point) && Number.isFinite(Number(point[0])) && Number.isFinite(Number(point[1])))
+      .map((point) => [Number(point[0]), Number(point[1])])
+    : [];
+
+  const linePoints = sanitizedRoute.length
+    ? sanitizedRoute
+    : [
+      [origin.latitude, origin.longitude],
+      [destination.latitude, destination.longitude]
+    ];
+
+  distanceRouteLine = window.L.polyline(linePoints, {
+    color: "#d9072a",
+    weight: 5,
+    opacity: 0.85
+  }).addTo(distanceLeafletMap);
+
+  distanceLeafletMap.fitBounds(distanceRouteLine.getBounds(), { padding: [24, 24] });
+
+  if (mapLink) {
+    mapLink.href = buildOsmDirectionsUrl(origin, destination);
+    mapLink.hidden = false;
+  }
+}
 
 function setupDistanceOverlayToggle() {
   if (!distanceOverlay || !distanceTogglePanel) {
@@ -765,7 +929,20 @@ function setupDistanceOverlayToggle() {
   });
 }
 
+function keepDistanceOverlayVisible() {
+  if (!distanceOverlay || !distanceTogglePanel) {
+    return;
+  }
+
+  distanceOverlay.classList.remove("is-collapsed");
+  distanceTogglePanel.textContent = "−";
+  distanceTogglePanel.setAttribute("aria-label", "Minimize panel");
+  distanceTogglePanel.setAttribute("title", "Minimize");
+  distanceTogglePanel.setAttribute("aria-expanded", "true");
+}
+
 setupDistanceOverlayToggle();
+keepDistanceOverlayVisible();
 
 function enableDistanceOverlayDrag() {
   if (!distanceOverlay || !distanceMapShell || !distanceDragHandle) {
@@ -844,6 +1021,7 @@ function renderDistanceResult(location) {
   }
 
   distanceResult.innerHTML = `<p>Calculating route to ${escapeHtml(selectedHostelName)}...</p>`;
+  keepDistanceOverlayVisible();
 
   const payload = {
     userLocationText: location,
@@ -869,25 +1047,22 @@ function renderDistanceResult(location) {
     .then((response) => response.json())
     .then((result) => {
       const distanceText = String(result.route?.distance_text || "").trim();
-      const durationText = String(result.route?.duration_text || "").trim();
       const fromText = String(result.origin?.formatted_address || location).trim();
+      const origin = {
+        latitude: Number(result.origin?.latitude),
+        longitude: Number(result.origin?.longitude)
+      };
 
       distanceResult.innerHTML = `
         <p><strong>${escapeHtml(selectedHostelName)}</strong></p>
         <p>From: ${escapeHtml(fromText)}</p>
         <p>Distance: ${escapeHtml(distanceText)}</p>
-        <p>Travel Time: ${escapeHtml(durationText)}</p>
       `;
 
-      const mapQuery = `${selectedHostelName} from ${fromText}`;
-      const encodedQuery = encodeURIComponent(mapQuery);
-
-      if (distanceMapFrame) {
-        distanceMapFrame.src = `https://maps.google.com/maps?q=${encodedQuery}&z=12&output=embed`;
-      }
+      renderRouteOnMap(selectedHostelKey, origin, result.route?.coordinates || []);
 
       if (mapLink) {
-        mapLink.href = String(result.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`);
+        mapLink.href = String(result.osm_directions_url || mapLink.href || "#");
         mapLink.hidden = false;
       }
     })
@@ -964,23 +1139,20 @@ async function fallbackDistanceEstimate(location, selectedHostelKey, selectedHos
     const origin = await geocodeLocationFallback(location);
     const straightDistanceKm = haversineDistanceKm(origin.latitude, origin.longitude, latitude, longitude);
     const estimatedRoadDistanceKm = straightDistanceKm * 1.2;
-    const estimatedMinutes = Math.max(1, Math.round((estimatedRoadDistanceKm / 28) * 60));
 
     distanceResult.innerHTML = `
       <p><strong>${escapeHtml(selectedHostelName)}</strong></p>
       <p>From: ${escapeHtml(origin.formattedAddress)}</p>
       <p>Distance: ~${escapeHtml(estimatedRoadDistanceKm.toFixed(1))} km (approx)</p>
-      <p>Travel Time: ~${escapeHtml(String(estimatedMinutes))} mins (approx)</p>
     `;
 
-    const hostelQuery = `${latitude},${longitude}`;
-    if (distanceMapFrame) {
-      distanceMapFrame.src = `https://maps.google.com/maps?q=${encodeURIComponent(hostelQuery)}&z=15&output=embed`;
-    }
+    renderRouteOnMap(selectedHostelKey, origin, [
+      [origin.latitude, origin.longitude],
+      [latitude, longitude]
+    ]);
 
     if (mapLink) {
-      const routeQuery = `${selectedHostelName} from ${origin.formattedAddress}`;
-      mapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(routeQuery)}`;
+      mapLink.href = buildOsmDirectionsUrl(origin, { latitude, longitude });
       mapLink.hidden = false;
     }
   } catch (_fallbackError) {
@@ -992,33 +1164,14 @@ async function fallbackDistanceEstimate(location, selectedHostelKey, selectedHos
 }
 
 function updateMapForSelectedHostel() {
-  if (!distanceHostelSelect || !distanceMapFrame) {
+  if (!distanceHostelSelect) {
     return;
   }
 
+  keepDistanceOverlayVisible();
+
   const selectedHostelKey = String(distanceHostelSelect.value || "praneeth1");
-  const selectedHostelName = String(hostelsData[selectedHostelKey]?.name || "Selected hostel").trim();
-  const apiHostel = apiHostelsByKey[selectedHostelKey];
-  const fallbackHostel = hostelsData[selectedHostelKey] || {};
-
-  const latitude = Number.isFinite(apiHostel?.latitude)
-    ? Number(apiHostel.latitude)
-    : (Number.isFinite(fallbackHostel.latitude) ? Number(fallbackHostel.latitude) : null);
-  const longitude = Number.isFinite(apiHostel?.longitude)
-    ? Number(apiHostel.longitude)
-    : (Number.isFinite(fallbackHostel.longitude) ? Number(fallbackHostel.longitude) : null);
-
-  let mapQuery = selectedHostelName;
-  if (latitude !== null && longitude !== null) {
-    mapQuery = `${latitude},${longitude}`;
-  }
-
-  distanceMapFrame.src = `https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&z=15&output=embed`;
-
-  if (mapLink) {
-    mapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedHostelName)}`;
-    mapLink.hidden = false;
-  }
+  focusMapOnHostel(selectedHostelKey);
 }
 
 distanceForm?.addEventListener("submit", (event) => {
@@ -1035,6 +1188,8 @@ distanceHostelSelect?.addEventListener("change", () => {
 });
 
 if (distanceHostelSelect) {
+  ensureDistanceMapReady();
+  keepDistanceOverlayVisible();
   // Ensure map starts on currently selected hostel when page opens.
   updateMapForSelectedHostel();
 }

@@ -391,10 +391,9 @@ body[data-page="contact"] .contact-layout {
   border-radius: 24px;
 }
 
-.distance-map-frame {
+.distance-map-canvas {
   width: 100%;
   height: 620px;
-  border: none;
   display: block;
 }
 
@@ -402,6 +401,7 @@ body[data-page="contact"] .contact-layout {
   position: absolute;
   top: 24px;
   left: 24px;
+  z-index: 1200;
   width: min(460px, calc(100% - 48px));
   padding: 1.25rem;
   background: rgba(255, 255, 255, 0.94);
@@ -1071,7 +1071,7 @@ textarea:focus {
     min-height: auto;
   }
 
-  .distance-map-frame {
+  .distance-map-canvas {
     height: 520px;
   }
 

@@ -1,5 +1,5 @@
 const Hostel = require("../models/Hostel");
-const { geocodeAddress, getDrivingDistance } = require("../config/googleMaps");
+const { geocodeAddress, getDrivingDistance } = require("../config/osrmMaps");
 
 const hostelKeyToSlug = {
   praneeth1: "sai-praneeth-boys-hostel-1",
@@ -53,7 +53,9 @@ async function getHostelDistance(req, res) {
 
   const route = await getDrivingDistance(origin, destination);
 
-  const mapsUrlQuery = encodeURIComponent(`${hostel.name} from ${origin.formattedAddress}`);
+  const osmDirectionsUrl =
+    `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=` +
+    `${encodeURIComponent(`${origin.latitude},${origin.longitude};${hostel.latitude},${hostel.longitude}`)}`;
 
   return res.json({
     hostel: {
@@ -74,9 +76,10 @@ async function getHostelDistance(req, res) {
       distance_text: route.distanceText,
       duration_text: route.durationText,
       distance_km: route.distanceKm,
-      duration_minutes: route.durationMinutes
+      duration_minutes: route.durationMinutes,
+      coordinates: route.coordinates
     },
-    google_maps_url: `https://www.google.com/maps/search/?api=1&query=${mapsUrlQuery}`
+    osm_directions_url: osmDirectionsUrl
   });
 }
 
