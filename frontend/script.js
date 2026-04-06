@@ -350,13 +350,18 @@ function hostelKeyFromApi(hostel) {
   return slug || name.replaceAll(" ", "-") || "unknown-hostel";
 }
 
-function mapApiHostelToFrontend(hostel) {
+function mapApiHostelToFrontend(hostel, existingHostel = {}) {
   const rooms = Array.isArray(hostel.rooms)
     ? hostel.rooms.map((room) => ({
       type: String(room.type || "").trim(),
       price: String(room.price || "").trim()
     }))
     : [];
+
+  const apiLatitude = Number(hostel.latitude);
+  const apiLongitude = Number(hostel.longitude);
+  const existingLatitude = Number(existingHostel.latitude);
+  const existingLongitude = Number(existingHostel.longitude);
 
   return {
     id: String(hostel._id || "").trim(),
@@ -369,8 +374,12 @@ function mapApiHostelToFrontend(hostel) {
     description: String(hostel.description || "").trim(),
     cardImage: String(hostel.card_image_url || "").trim(),
     heroImage: String(hostel.hero_image_url || "").trim(),
-    latitude: Number.isFinite(Number(hostel.latitude)) ? Number(hostel.latitude) : null,
-    longitude: Number.isFinite(Number(hostel.longitude)) ? Number(hostel.longitude) : null,
+    latitude: Number.isFinite(apiLatitude)
+      ? apiLatitude
+      : (Number.isFinite(existingLatitude) ? existingLatitude : null),
+    longitude: Number.isFinite(apiLongitude)
+      ? apiLongitude
+      : (Number.isFinite(existingLongitude) ? existingLongitude : null),
     facilities: Array.isArray(hostel.facilities) ? hostel.facilities : [],
     rooms,
     availability: [],
@@ -455,7 +464,7 @@ async function hydrateHostelsFromApi() {
     const mapped = {};
     hostels.forEach((hostel) => {
       const key = hostelKeyFromApi(hostel);
-      mapped[key] = mapApiHostelToFrontend(hostel);
+      mapped[key] = mapApiHostelToFrontend(hostel, hostelsData[key] || defaultHostelsData[key] || {});
       apiHostelsByKey[key] = hostel;
     });
 
