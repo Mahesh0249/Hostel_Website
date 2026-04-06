@@ -12,6 +12,7 @@ const hostelRoutes = require("./routes/hostelRoutes");
 const galleryRoutes = require("./routes/galleryRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const contactDetailsRoutes = require("./routes/contactDetailsRoutes");
+const rulesRoutes = require("./routes/rulesRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const distanceRoutes = require("./routes/distanceRoutes");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
@@ -79,6 +80,7 @@ app.use("/api/hostels", hostelRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/contact-details", contactDetailsRoutes);
+app.use("/api/rules", rulesRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/distance", distanceRoutes);
 
@@ -90,12 +92,14 @@ const pageRoutes = {
   "/hostels": "pages/hostels.html",
   "/facilities": "pages/facilities.html",
   "/gallery": "pages/gallery.html",
+  "/rules": "pages/rules.html",
   "/distance": "pages/distance.html",
   "/contact": "pages/contact.html",
   "/admin": "pages/admin.html",
   "/admin/contact": "pages/admin-contact.html",
   "/admin/hostels": "pages/admin-hostels.html",
   "/admin/gallery": "pages/admin-gallery.html",
+  "/admin/rules": "pages/admin-rules.html",
   "/admin/users": "pages/admin-users.html",
   "/elvy-stays": "pages/elvy-stays.html",
   "/hostel-praneeth1": "pages/hostel-praneeth1.html",

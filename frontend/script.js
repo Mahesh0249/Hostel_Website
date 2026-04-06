@@ -23,6 +23,95 @@ const defaultMainGallery = [
   "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1200&q=80"
 ];
 
+const defaultRulesPolicy = {
+  pageTitle: "Rules and Regulations",
+  introText:
+    "Please read and follow these rules to maintain a safe, respectful, and comfortable environment for all residents.",
+  lastUpdatedLabel: "Last updated: April 2026",
+  sections: [
+    {
+      sectionId: "admission-eligibility",
+      title: "Admission and Eligibility",
+      description: "Requirements for joining the hostel.",
+      points: [
+        "Residents must provide valid ID proof and required academic documents during admission.",
+        "Admission is subject to room availability and management approval.",
+        "False or incomplete information may lead to cancellation of admission."
+      ]
+    },
+    {
+      sectionId: "fees-payments",
+      title: "Fees and Payments",
+      description: "Payment timelines and rules.",
+      points: [
+        "Monthly fee must be paid on or before the due date informed by management.",
+        "Late fee may be charged for delayed payments.",
+        "Security deposit terms and refund timelines are governed by signed admission terms."
+      ]
+    },
+    {
+      sectionId: "discipline-conduct",
+      title: "Discipline and Conduct",
+      description: "Expected resident behavior.",
+      points: [
+        "Residents must maintain respectful behavior with staff and fellow residents.",
+        "Physical fights, abuse, or harassment are strictly prohibited.",
+        "Any illegal activity will be reported to authorities immediately."
+      ]
+    },
+    {
+      sectionId: "curfew-visitors",
+      title: "Curfew and Visitors",
+      description: "Entry timings and guest policies.",
+      points: [
+        "Residents should follow hostel gate timings and curfew rules.",
+        "Visitors are allowed only in designated areas during permitted hours.",
+        "Overnight stay of non-residents is not allowed unless approved in writing by management."
+      ]
+    },
+    {
+      sectionId: "cleanliness-maintenance",
+      title: "Cleanliness and Maintenance",
+      description: "Room upkeep and property care.",
+      points: [
+        "Residents are responsible for keeping rooms and common areas clean.",
+        "Damaging hostel property may result in penalties and recovery charges.",
+        "Maintenance issues should be reported promptly to management."
+      ]
+    },
+    {
+      sectionId: "safety-security",
+      title: "Safety and Security",
+      description: "Measures for personal and hostel safety.",
+      points: [
+        "Residents must cooperate with security checks whenever required.",
+        "Sharing room keys/access credentials with outsiders is prohibited.",
+        "Management is not responsible for loss of valuables kept unsecured."
+      ]
+    },
+    {
+      sectionId: "prohibited-items",
+      title: "Prohibited Items and Activities",
+      description: "Items and activities not permitted in hostel premises.",
+      points: [
+        "Consumption or possession of alcohol, drugs, and other banned substances is prohibited.",
+        "Smoking inside rooms and restricted zones is not allowed.",
+        "Cooking devices and unsafe electrical appliances are not allowed unless approved."
+      ]
+    },
+    {
+      sectionId: "violations-termination",
+      title: "Violations and Termination",
+      description: "Actions on non-compliance.",
+      points: [
+        "Repeated violation of rules may lead to warnings, fines, or expulsion.",
+        "In serious cases, management can terminate stay without prior notice.",
+        "Management reserves the right to update rules for safety and operational needs."
+      ]
+    }
+  ]
+};
+
 const defaultHostelsData = {
   praneeth1: {
     name: "Sai Praneeth Boys Hostel 1",
@@ -135,6 +224,7 @@ function deepClone(value) {
 let contactDetails = deepClone(defaultContactDetails);
 let hostelsData = deepClone(defaultHostelsData);
 let mainGalleryData = deepClone(defaultMainGallery);
+let rulesPolicyData = deepClone(defaultRulesPolicy);
 let mainGalleryRecordIds = [];
 const ADMIN_TOKEN_STORAGE_KEY = "hostelAdminToken";
 const ADMIN_REDIRECT_STORAGE_KEY = "hostelAdminRedirectPath";
@@ -387,6 +477,63 @@ function mapApiHostelToFrontend(hostel, existingHostel = {}) {
   };
 }
 
+function mapApiRulesToFrontend(payload) {
+  const sections = Array.isArray(payload?.sections)
+    ? payload.sections
+      .map((section, index) => ({
+        sectionId: String(section?.section_id || `section-${index + 1}`).trim(),
+        title: String(section?.title || "").trim(),
+        description: String(section?.description || "").trim(),
+        points: Array.isArray(section?.points)
+          ? section.points.map((point) => String(point || "").trim()).filter(Boolean)
+          : []
+      }))
+      .filter((section) => section.title)
+    : [];
+
+  return {
+    pageTitle: String(payload?.page_title || defaultRulesPolicy.pageTitle).trim(),
+    introText: String(payload?.intro_text || defaultRulesPolicy.introText).trim(),
+    lastUpdatedLabel: String(payload?.last_updated_label || defaultRulesPolicy.lastUpdatedLabel).trim(),
+    sections: sections.length ? sections : deepClone(defaultRulesPolicy.sections)
+  };
+}
+
+function applyRulesPolicyToPage() {
+  const rulesPageTitle = document.getElementById("rulesPageTitle");
+  const rulesIntroText = document.getElementById("rulesIntroText");
+  const rulesLastUpdated = document.getElementById("rulesLastUpdated");
+  const rulesSections = document.getElementById("rulesSections");
+
+  if (!rulesPageTitle || !rulesIntroText || !rulesLastUpdated || !rulesSections) {
+    return;
+  }
+
+  rulesPageTitle.textContent = rulesPolicyData.pageTitle || defaultRulesPolicy.pageTitle;
+  rulesIntroText.textContent = rulesPolicyData.introText || defaultRulesPolicy.introText;
+  rulesLastUpdated.textContent = rulesPolicyData.lastUpdatedLabel || defaultRulesPolicy.lastUpdatedLabel;
+
+  const sections = Array.isArray(rulesPolicyData.sections) ? rulesPolicyData.sections : [];
+  if (!sections.length) {
+    rulesSections.innerHTML = "<article class=\"card rules-section-card\"><h4>No sections configured</h4><p>Admin can add sections from the rules editor.</p></article>";
+    return;
+  }
+
+  rulesSections.innerHTML = sections
+    .map(
+      (section, index) => `
+      <article class="card rules-section-card" id="${escapeHtml(String(section.sectionId || `rules-${index + 1}`))}">
+        <h4>${escapeHtml(section.title || `Section ${index + 1}`)}</h4>
+        ${section.description ? `<p class="rules-section-desc">${escapeHtml(section.description)}</p>` : ""}
+        ${Array.isArray(section.points) && section.points.length
+    ? `<ul class="rules-points">${section.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}</ul>`
+    : "<p class=\"helper-text\">No detailed points added for this section yet.</p>"}
+      </article>
+    `
+    )
+    .join("");
+}
+
 function getAuthHeaders() {
   if (!adminToken) {
     return {};
@@ -507,6 +654,18 @@ async function hydrateGalleryFromApi() {
   }
 }
 
+async function hydrateRulesFromApi() {
+  try {
+    const response = await apiFetchWithRetry("/api/rules", { method: "GET" });
+    const payload = await response.json();
+    rulesPolicyData = mapApiRulesToFrontend(payload);
+    applyRulesPolicyToPage();
+  } catch (_error) {
+    rulesPolicyData = deepClone(defaultRulesPolicy);
+    applyRulesPolicyToPage();
+  }
+}
+
 async function submitEnquiryToApi(payload) {
   await apiFetchWithRetry("/api/contact", {
     method: "POST",
@@ -536,6 +695,30 @@ async function resetContactDetailsToApi() {
       ...getAuthHeaders()
     }
   });
+  return response.json();
+}
+
+async function saveRulesPolicyToApi(payload) {
+  const response = await apiFetchWithRetry("/api/rules", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders()
+    },
+    body: JSON.stringify(payload)
+  });
+
+  return response.json();
+}
+
+async function resetRulesPolicyToApi() {
+  const response = await apiFetchWithRetry("/api/rules/reset", {
+    method: "POST",
+    headers: {
+      ...getAuthHeaders()
+    }
+  });
+
   return response.json();
 }
 
@@ -721,6 +904,28 @@ document.addEventListener("click", (event) => {
 });
 
 const currentPage = document.body.dataset.page;
+
+function ensureRulesNavLink() {
+  if (!mainNav || mainNav.querySelector('a[data-nav="rules"]')) {
+    return;
+  }
+
+  const rulesLink = document.createElement("a");
+  rulesLink.href = "/rules";
+  rulesLink.dataset.nav = "rules";
+  rulesLink.textContent = "Rules";
+
+  const contactLink = mainNav.querySelector('a[data-nav="contact"]');
+  if (contactLink && contactLink.parentNode) {
+    contactLink.parentNode.insertBefore(rulesLink, contactLink);
+    return;
+  }
+
+  mainNav.appendChild(rulesLink);
+}
+
+ensureRulesNavLink();
+
 if (currentPage) {
   document.querySelectorAll("[data-nav]").forEach((link) => {
     if (link.dataset.nav === currentPage) {
@@ -1316,6 +1521,7 @@ const adminLoginStatus = document.getElementById("adminLoginStatus");
 const adminEditor = document.getElementById("adminEditor");
 const hostelEditor = document.getElementById("hostelEditor");
 const galleryEditor = document.getElementById("galleryEditor");
+const rulesEditor = document.getElementById("rulesEditor");
 const adminUserEditor = document.getElementById("adminUserEditor");
 const createAdminForm = document.getElementById("createAdminForm");
 const newAdminName = document.getElementById("newAdminName");
@@ -1384,6 +1590,14 @@ const mainGalleryFiles = document.getElementById("mainGalleryFiles");
 const mainGalleryFilesInfo = document.getElementById("mainGalleryFilesInfo");
 const resetMainGalleryBtn = document.getElementById("resetMainGalleryBtn");
 const mainGalleryStatus = document.getElementById("mainGalleryStatus");
+const adminRulesForm = document.getElementById("adminRulesForm");
+const adminRulesPageTitle = document.getElementById("adminRulesPageTitle");
+const adminRulesIntro = document.getElementById("adminRulesIntro");
+const adminRulesLastUpdated = document.getElementById("adminRulesLastUpdated");
+const addRuleSectionBtn = document.getElementById("addRuleSectionBtn");
+const rulesSectionsBuilder = document.getElementById("rulesSectionsBuilder");
+const adminRulesResetBtn = document.getElementById("adminRulesResetBtn");
+const adminRulesStatus = document.getElementById("adminRulesStatus");
 const adminLogoutBtn = document.getElementById("adminLogoutBtn");
 const adminLoginCard = adminLoginForm?.closest(".admin-card");
 
@@ -1405,11 +1619,17 @@ function unlockAdminSections() {
   adminEditor?.removeAttribute("hidden");
   hostelEditor?.removeAttribute("hidden");
   galleryEditor?.removeAttribute("hidden");
+  rulesEditor?.removeAttribute("hidden");
   adminUserEditor?.removeAttribute("hidden");
 }
 
 async function hydrateUnlockedAdminData() {
-  await Promise.all([hydrateContactDetailsFromApi(), hydrateHostelsFromApi(), hydrateGalleryFromApi()]);
+  await Promise.all([
+    hydrateContactDetailsFromApi(),
+    hydrateHostelsFromApi(),
+    hydrateGalleryFromApi(),
+    hydrateRulesFromApi()
+  ]);
   await hydrateAdminsFromApi();
 
   fillAdminContactForm();
@@ -1417,6 +1637,7 @@ async function hydrateUnlockedAdminData() {
     fillHostelForm(adminHostelSelect.value);
   }
   fillMainGalleryForm();
+  fillAdminRulesForm();
 }
 
 async function tryAutoUnlockAdmin() {
@@ -1781,6 +2002,108 @@ function fillMainGalleryForm() {
   if (mainGalleryUrls) {
     setMainGalleryBuilder(mainGalleryData);
   }
+}
+
+function normalizeRuleSectionId(value, fallbackIndex) {
+  const normalized = String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  return normalized || `section-${fallbackIndex + 1}`;
+}
+
+function parseRulePoints(value) {
+  return String(value || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function addRuleSectionEditor(section = {}) {
+  if (!rulesSectionsBuilder) {
+    return;
+  }
+
+  const wrapper = document.createElement("article");
+  wrapper.className = "builder-row rules-editor-row";
+
+  const titleInput = document.createElement("input");
+  titleInput.type = "text";
+  titleInput.className = "rules-section-title";
+  titleInput.placeholder = "Section title";
+  titleInput.value = String(section.title || "").trim();
+
+  const descInput = document.createElement("textarea");
+  descInput.className = "rules-section-description";
+  descInput.rows = 2;
+  descInput.placeholder = "Short description (optional)";
+  descInput.value = String(section.description || "").trim();
+
+  const pointsInput = document.createElement("textarea");
+  pointsInput.className = "rules-section-points";
+  pointsInput.rows = 5;
+  pointsInput.placeholder = "One rule point per line";
+  pointsInput.value = Array.isArray(section.points) ? section.points.join("\n") : "";
+
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.className = "btn btn-outline";
+  removeBtn.textContent = "Delete Section";
+  removeBtn.addEventListener("click", () => {
+    wrapper.remove();
+  });
+
+  wrapper.append(titleInput, descInput, pointsInput, removeBtn);
+  rulesSectionsBuilder.appendChild(wrapper);
+}
+
+function setRulesSectionsEditor(sections) {
+  if (!rulesSectionsBuilder) {
+    return;
+  }
+
+  rulesSectionsBuilder.innerHTML = "";
+  const normalized = Array.isArray(sections) && sections.length ? sections : deepClone(defaultRulesPolicy.sections);
+  normalized.forEach((section) => addRuleSectionEditor(section));
+}
+
+function readRulesSectionsFromEditor() {
+  if (!rulesSectionsBuilder) {
+    return [];
+  }
+
+  const rows = Array.from(rulesSectionsBuilder.querySelectorAll(".rules-editor-row"));
+  return rows
+    .map((row, index) => {
+      const title = String(row.querySelector(".rules-section-title")?.value || "").trim();
+      if (!title) {
+        return null;
+      }
+
+      return {
+        section_id: normalizeRuleSectionId(title, index),
+        title,
+        description: String(row.querySelector(".rules-section-description")?.value || "").trim(),
+        points: parseRulePoints(row.querySelector(".rules-section-points")?.value || ""),
+        sort_order: index + 1
+      };
+    })
+    .filter(Boolean);
+}
+
+function fillAdminRulesForm() {
+  if (!adminRulesPageTitle || !adminRulesIntro || !adminRulesLastUpdated) {
+    return;
+  }
+
+  adminRulesPageTitle.value = rulesPolicyData.pageTitle || defaultRulesPolicy.pageTitle;
+  adminRulesIntro.value = rulesPolicyData.introText || defaultRulesPolicy.introText;
+  adminRulesLastUpdated.value = rulesPolicyData.lastUpdatedLabel || defaultRulesPolicy.lastUpdatedLabel;
+  setRulesSectionsEditor(rulesPolicyData.sections || []);
 }
 
 function formatEnquiryTime(value) {
@@ -2193,6 +2516,86 @@ adminResetBtn?.addEventListener("click", async () => {
   }
 });
 
+addRuleSectionBtn?.addEventListener("click", () => {
+  addRuleSectionEditor({
+    title: "",
+    description: "",
+    points: []
+  });
+  if (adminRulesStatus) {
+    adminRulesStatus.textContent = "Added new section. Fill title and points, then save.";
+  }
+});
+
+adminRulesForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const pageTitle = String(adminRulesPageTitle?.value || "").trim();
+  const introText = String(adminRulesIntro?.value || "").trim();
+  const lastUpdatedLabel = String(adminRulesLastUpdated?.value || "").trim();
+  const sections = readRulesSectionsFromEditor();
+
+  if (!pageTitle || !introText) {
+    if (adminRulesStatus) {
+      adminRulesStatus.textContent = "Page title and intro text are required.";
+    }
+    return;
+  }
+
+  if (!sections.length) {
+    if (adminRulesStatus) {
+      adminRulesStatus.textContent = "Add at least one section with a title.";
+    }
+    return;
+  }
+
+  try {
+    if (adminRulesStatus) {
+      adminRulesStatus.textContent = "Saving rules page to DB...";
+    }
+
+    const saved = await saveRulesPolicyToApi({
+      page_title: pageTitle,
+      intro_text: introText,
+      last_updated_label: lastUpdatedLabel,
+      sections
+    });
+
+    rulesPolicyData = mapApiRulesToFrontend(saved);
+    applyRulesPolicyToPage();
+    fillAdminRulesForm();
+
+    if (adminRulesStatus) {
+      adminRulesStatus.textContent = "Rules page updated in DB.";
+    }
+  } catch (error) {
+    if (adminRulesStatus) {
+      adminRulesStatus.textContent = error.message || "Failed to update rules page.";
+    }
+  }
+});
+
+adminRulesResetBtn?.addEventListener("click", async () => {
+  try {
+    if (adminRulesStatus) {
+      adminRulesStatus.textContent = "Resetting rules to default in DB...";
+    }
+
+    const reset = await resetRulesPolicyToApi();
+    rulesPolicyData = mapApiRulesToFrontend(reset);
+    applyRulesPolicyToPage();
+    fillAdminRulesForm();
+
+    if (adminRulesStatus) {
+      adminRulesStatus.textContent = "Rules reset in DB.";
+    }
+  } catch (error) {
+    if (adminRulesStatus) {
+      adminRulesStatus.textContent = error.message || "Failed to reset rules.";
+    }
+  }
+});
+
 adminHostelSelect?.addEventListener("change", (event) => {
   const target = event.target;
   fillHostelForm(target.value);
@@ -2429,7 +2832,9 @@ applyContactDetailsToPage();
 applyHostelCardsData();
 applyHostelDetailData();
 applyMainGalleryData();
+applyRulesPolicyToPage();
 hydrateContactDetailsFromApi();
 hydrateHostelsFromApi();
 hydrateGalleryFromApi();
+hydrateRulesFromApi();
 tryAutoUnlockAdmin();

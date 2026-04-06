@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Contact Settings | Sai Praneeth & Elvy Student Stays</title>
-  <meta name="description" content="Admin page for updating enquiry and booking contact details." />
+  <title>Admin Rules Manager | Sai Praneeth & Elvy Student Stays</title>
+  <meta name="description" content="Admin page for editing rules and regulations sections." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="../style.css" />
 </head>
 <body data-page="admin">
-    <header class="site-header admin-header">
+  <header class="site-header admin-header">
     <div class="container admin-topbar">
       <a href="/admin" class="brand">Sai Praneeth & Elvy Admin</a>
       <p class="admin-topbar-note">Private Content Management Area</p>
@@ -24,10 +24,10 @@
       <div class="container admin-shell">
         <nav class="card admin-subnav" aria-label="Admin sections">
           <a href="/admin" class="admin-subnav-link">Dashboard</a>
-          <a href="/admin/contact" class="admin-subnav-link active">Contact</a>
+          <a href="/admin/contact" class="admin-subnav-link">Contact</a>
           <a href="/admin/hostels" class="admin-subnav-link">Hostels</a>
           <a href="/admin/gallery" class="admin-subnav-link">Main Gallery</a>
-          <a href="/admin/rules" class="admin-subnav-link">Rules</a>
+          <a href="/admin/rules" class="admin-subnav-link active">Rules</a>
           <a href="/admin/users" class="admin-subnav-link">Admins</a>
           <button id="adminLogoutBtn" type="button" class="btn btn-outline admin-logout-btn">Logout</button>
         </nav>
@@ -45,40 +45,33 @@
             </form>
           </div>
 
-          <div class="card admin-card" id="adminEditor" hidden>
-            <h4 class="admin-card-title">Contact Settings</h4>
-            <p class="admin-card-subtitle">Update the primary phone, WhatsApp, email, and address shown across the website.</p>
-            <form id="adminContactForm" class="admin-form">
+          <div class="card admin-card" id="rulesEditor" hidden>
+            <h4 class="admin-card-title">Rules and Regulations Manager</h4>
+            <p class="admin-card-subtitle">Edit section names and details, add new sections, delete outdated sections, and publish instantly.</p>
+            <form id="adminRulesForm" class="admin-form">
               <div class="admin-group">
-                <h5>Primary Contact</h5>
-                <div class="admin-grid-2">
-                  <div>
-                    <label for="adminPhone">Phone number</label>
-                    <input id="adminPhone" name="phone" type="text" required />
-                  </div>
-                  <div>
-                    <label for="adminWhatsapp">WhatsApp number (digits only)</label>
-                    <input id="adminWhatsapp" name="whatsapp" type="text" required />
-                  </div>
-                </div>
+                <h5>Page Header</h5>
+                <label for="adminRulesPageTitle">Page Title</label>
+                <input id="adminRulesPageTitle" type="text" required />
+                <label for="adminRulesIntro">Intro Text</label>
+                <textarea id="adminRulesIntro" rows="3" required></textarea>
+                <label for="adminRulesLastUpdated">Last Updated Label</label>
+                <input id="adminRulesLastUpdated" type="text" placeholder="Last updated: April 2026" />
+              </div>
 
-                <div class="admin-grid-2">
-                  <div>
-                    <label for="adminEmail">Email</label>
-                    <input id="adminEmail" name="email" type="email" required />
-                  </div>
-                  <div>
-                    <label for="adminAddress">Address</label>
-                    <textarea id="adminAddress" name="address" rows="3" required></textarea>
-                  </div>
+              <div class="admin-group">
+                <h5>Sections</h5>
+                <div class="action-row">
+                  <button id="addRuleSectionBtn" type="button" class="btn btn-outline">Add Section</button>
                 </div>
+                <div id="rulesSectionsBuilder" class="builder-stack"></div>
               </div>
 
               <div class="action-row">
-                <button type="submit" class="btn btn-primary">Save Details</button>
-                <button id="adminResetBtn" type="button" class="btn btn-outline">Reset Default</button>
+                <button type="submit" class="btn btn-primary">Save Rules Page</button>
+                <button id="adminRulesResetBtn" type="button" class="btn btn-outline">Reset Default Rules</button>
               </div>
-              <p class="status-text" id="adminStatus" aria-live="polite"></p>
+              <p class="status-text" id="adminRulesStatus" aria-live="polite"></p>
             </form>
           </div>
         </div>
@@ -99,6 +92,7 @@
           <li><a href="/hostels">Hostels</a></li>
           <li><a href="/facilities">Facilities</a></li>
           <li><a href="/gallery">Gallery</a></li>
+          <li><a href="/rules">Rules and Regulations</a></li>
           <li><a href="/contact">Contact</a></li>
         </ul>
       </div>
