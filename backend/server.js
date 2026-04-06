@@ -36,6 +36,7 @@ app.use(
         imgSrc: ["'self'", "data:", "blob:", "https:"],
         connectSrc: [
           "'self'",
+          "https://unpkg.com",
           "https://nominatim.openstreetmap.org",
           "https://router.project-osrm.org",
           "https://tile.openstreetmap.org",
