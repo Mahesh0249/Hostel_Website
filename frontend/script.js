@@ -14,6 +14,27 @@ const defaultContactDetails = {
   address: "Locality, City, State"
 };
 
+const defaultDashboardContent = {
+  heroTag: "Located near major colleges and student hubs.",
+  heroTitle: "Sai Praneeth & Elvy Student Stays",
+  heroSubtitle: "Affordable and Comfortable Student Hostels Near College",
+  heroDescription: "Safe, clean, and budget friendly PG accommodation with WiFi, food, and reliable connectivity.",
+  primaryCtaText: "View Hostels",
+  primaryCtaHref: "/hostels",
+  secondaryCtaText: "Contact Us",
+  secondaryCtaHref: "/contact",
+  servicesHeading: "Explore Our Services",
+  servicesSubheading: "Use these quick links to access every part of the website.",
+  featureHostelsTitle: "Hostels",
+  featureHostelsDesc: "Compare rooms, pricing, and details for all hostels.",
+  featureFacilitiesTitle: "Facilities",
+  featureFacilitiesDesc: "Review services available across our properties.",
+  featureGalleryTitle: "Gallery",
+  featureGalleryDesc: "See room interiors, common spaces, and exteriors.",
+  featureFindUsTitle: "Find Us",
+  featureFindUsDesc: "Estimate distance and travel time from your location."
+};
+
 const defaultMainGallery = [
   "https://images.unsplash.com/photo-1616594039964-3fd3d3f4c2b8?auto=format&fit=crop&w=1200&q=80",
   "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
@@ -222,6 +243,7 @@ function deepClone(value) {
 }
 
 let contactDetails = deepClone(defaultContactDetails);
+let dashboardContent = deepClone(defaultDashboardContent);
 let hostelsData = deepClone(defaultHostelsData);
 let mainGalleryData = deepClone(defaultMainGallery);
 let rulesPolicyData = deepClone(defaultRulesPolicy);
@@ -505,24 +527,26 @@ function applyRulesPolicyToPage() {
   const rulesLastUpdated = document.getElementById("rulesLastUpdated");
   const rulesSections = document.getElementById("rulesSections");
 
-  if (!rulesPageTitle || !rulesIntroText || !rulesLastUpdated || !rulesSections) {
+  if (!rulesPageTitle || !rulesIntroText || !rulesSections) {
     return;
   }
 
   rulesPageTitle.textContent = rulesPolicyData.pageTitle || defaultRulesPolicy.pageTitle;
   rulesIntroText.textContent = rulesPolicyData.introText || defaultRulesPolicy.introText;
-  rulesLastUpdated.textContent = rulesPolicyData.lastUpdatedLabel || defaultRulesPolicy.lastUpdatedLabel;
+  if (rulesLastUpdated) {
+    rulesLastUpdated.textContent = rulesPolicyData.lastUpdatedLabel || defaultRulesPolicy.lastUpdatedLabel;
+  }
 
   const sections = Array.isArray(rulesPolicyData.sections) ? rulesPolicyData.sections : [];
   if (!sections.length) {
-    rulesSections.innerHTML = "<article class=\"card rules-section-card\"><h4>No sections configured</h4><p>Admin can add sections from the rules editor.</p></article>";
+    rulesSections.innerHTML = "<article class=\"rules-section-card\"><h4>No sections configured</h4><p>Admin can add sections from the rules editor.</p></article>";
     return;
   }
 
   rulesSections.innerHTML = sections
     .map(
       (section, index) => `
-      <article class="card rules-section-card" id="${escapeHtml(String(section.sectionId || `rules-${index + 1}`))}">
+      <article class="rules-section-card" id="${escapeHtml(String(section.sectionId || `rules-${index + 1}`))}">
         <h4>${escapeHtml(section.title || `Section ${index + 1}`)}</h4>
         ${section.description ? `<p class="rules-section-desc">${escapeHtml(section.description)}</p>` : ""}
         ${Array.isArray(section.points) && section.points.length
@@ -558,7 +582,31 @@ async function hydrateContactDetailsFromApi() {
       email: String(details.email || defaultContactDetails.email).trim(),
       address: String(details.address || defaultContactDetails.address).trim()
     };
+
+    const dashboard = details.dashboard || {};
+    dashboardContent = {
+      heroTag: String(dashboard.hero_tag || defaultDashboardContent.heroTag).trim(),
+      heroTitle: String(dashboard.hero_title || defaultDashboardContent.heroTitle).trim(),
+      heroSubtitle: String(dashboard.hero_subtitle || defaultDashboardContent.heroSubtitle).trim(),
+      heroDescription: String(dashboard.hero_description || defaultDashboardContent.heroDescription).trim(),
+      primaryCtaText: String(dashboard.primary_cta_text || defaultDashboardContent.primaryCtaText).trim(),
+      primaryCtaHref: String(dashboard.primary_cta_href || defaultDashboardContent.primaryCtaHref).trim(),
+      secondaryCtaText: String(dashboard.secondary_cta_text || defaultDashboardContent.secondaryCtaText).trim(),
+      secondaryCtaHref: String(dashboard.secondary_cta_href || defaultDashboardContent.secondaryCtaHref).trim(),
+      servicesHeading: String(dashboard.services_heading || defaultDashboardContent.servicesHeading).trim(),
+      servicesSubheading: String(dashboard.services_subheading || defaultDashboardContent.servicesSubheading).trim(),
+      featureHostelsTitle: String(dashboard.feature_hostels_title || defaultDashboardContent.featureHostelsTitle).trim(),
+      featureHostelsDesc: String(dashboard.feature_hostels_desc || defaultDashboardContent.featureHostelsDesc).trim(),
+      featureFacilitiesTitle: String(dashboard.feature_facilities_title || defaultDashboardContent.featureFacilitiesTitle).trim(),
+      featureFacilitiesDesc: String(dashboard.feature_facilities_desc || defaultDashboardContent.featureFacilitiesDesc).trim(),
+      featureGalleryTitle: String(dashboard.feature_gallery_title || defaultDashboardContent.featureGalleryTitle).trim(),
+      featureGalleryDesc: String(dashboard.feature_gallery_desc || defaultDashboardContent.featureGalleryDesc).trim(),
+      featureFindUsTitle: String(dashboard.feature_findus_title || defaultDashboardContent.featureFindUsTitle).trim(),
+      featureFindUsDesc: String(dashboard.feature_findus_desc || defaultDashboardContent.featureFindUsDesc).trim()
+    };
+
     applyContactDetailsToPage();
+    applyDashboardContentToPage();
   } catch (_error) {
   }
 }
@@ -786,6 +834,65 @@ function applyContactDetailsToPage() {
   document.querySelectorAll('a[href^="https://wa.me/"]').forEach((link) => {
     link.href = updateWhatsappHref(link.href, contactDetails.whatsapp);
   });
+}
+
+function sanitizeDashboardHref(value, fallback) {
+  const candidate = String(value || "").trim();
+  if (!candidate) {
+    return fallback;
+  }
+
+  if (candidate.startsWith("/")) {
+    return candidate;
+  }
+
+  try {
+    const parsed = new URL(candidate);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      return parsed.toString();
+    }
+  } catch (_error) {
+  }
+
+  return fallback;
+}
+
+function applyDashboardContentToPage() {
+  const mappings = [
+    ["homeHeroTagText", dashboardContent.heroTag],
+    ["homeHeroTitle", dashboardContent.heroTitle],
+    ["homeHeroSubtitle", dashboardContent.heroSubtitle],
+    ["homeHeroDescription", dashboardContent.heroDescription],
+    ["homeServicesHeading", dashboardContent.servicesHeading],
+    ["homeServicesSubheading", dashboardContent.servicesSubheading],
+    ["homeFeatureHostelsTitle", dashboardContent.featureHostelsTitle],
+    ["homeFeatureHostelsDesc", dashboardContent.featureHostelsDesc],
+    ["homeFeatureFacilitiesTitle", dashboardContent.featureFacilitiesTitle],
+    ["homeFeatureFacilitiesDesc", dashboardContent.featureFacilitiesDesc],
+    ["homeFeatureGalleryTitle", dashboardContent.featureGalleryTitle],
+    ["homeFeatureGalleryDesc", dashboardContent.featureGalleryDesc],
+    ["homeFeatureFindUsTitle", dashboardContent.featureFindUsTitle],
+    ["homeFeatureFindUsDesc", dashboardContent.featureFindUsDesc]
+  ];
+
+  mappings.forEach(([id, value]) => {
+    const node = document.getElementById(id);
+    if (node) {
+      node.textContent = String(value || "");
+    }
+  });
+
+  const primaryCta = document.getElementById("homePrimaryCta");
+  if (primaryCta) {
+    primaryCta.textContent = dashboardContent.primaryCtaText;
+    primaryCta.href = sanitizeDashboardHref(dashboardContent.primaryCtaHref, "/hostels");
+  }
+
+  const secondaryCta = document.getElementById("homeSecondaryCta");
+  if (secondaryCta) {
+    secondaryCta.textContent = dashboardContent.secondaryCtaText;
+    secondaryCta.href = sanitizeDashboardHref(dashboardContent.secondaryCtaHref, "/contact");
+  }
 }
 
 function applyHostelCardsData() {
@@ -1545,6 +1652,24 @@ const adminPhone = document.getElementById("adminPhone");
 const adminWhatsapp = document.getElementById("adminWhatsapp");
 const adminEmail = document.getElementById("adminEmail");
 const adminAddress = document.getElementById("adminAddress");
+const adminHomeHeroTag = document.getElementById("adminHomeHeroTag");
+const adminHomeHeroTitle = document.getElementById("adminHomeHeroTitle");
+const adminHomeHeroSubtitle = document.getElementById("adminHomeHeroSubtitle");
+const adminHomeHeroDescription = document.getElementById("adminHomeHeroDescription");
+const adminHomePrimaryCtaText = document.getElementById("adminHomePrimaryCtaText");
+const adminHomePrimaryCtaHref = document.getElementById("adminHomePrimaryCtaHref");
+const adminHomeSecondaryCtaText = document.getElementById("adminHomeSecondaryCtaText");
+const adminHomeSecondaryCtaHref = document.getElementById("adminHomeSecondaryCtaHref");
+const adminHomeServicesHeading = document.getElementById("adminHomeServicesHeading");
+const adminHomeServicesSubheading = document.getElementById("adminHomeServicesSubheading");
+const adminHomeFeatureHostelsTitle = document.getElementById("adminHomeFeatureHostelsTitle");
+const adminHomeFeatureHostelsDesc = document.getElementById("adminHomeFeatureHostelsDesc");
+const adminHomeFeatureFacilitiesTitle = document.getElementById("adminHomeFeatureFacilitiesTitle");
+const adminHomeFeatureFacilitiesDesc = document.getElementById("adminHomeFeatureFacilitiesDesc");
+const adminHomeFeatureGalleryTitle = document.getElementById("adminHomeFeatureGalleryTitle");
+const adminHomeFeatureGalleryDesc = document.getElementById("adminHomeFeatureGalleryDesc");
+const adminHomeFeatureFindUsTitle = document.getElementById("adminHomeFeatureFindUsTitle");
+const adminHomeFeatureFindUsDesc = document.getElementById("adminHomeFeatureFindUsDesc");
 
 const hostelDataForm = document.getElementById("hostelDataForm");
 const adminHostelSelect = document.getElementById("adminHostelSelect");
@@ -1964,6 +2089,61 @@ function fillAdminContactForm() {
   adminWhatsapp.value = contactDetails.whatsapp;
   adminEmail.value = contactDetails.email;
   adminAddress.value = contactDetails.address;
+
+  if (adminHomeHeroTag) {
+    adminHomeHeroTag.value = dashboardContent.heroTag;
+  }
+  if (adminHomeHeroTitle) {
+    adminHomeHeroTitle.value = dashboardContent.heroTitle;
+  }
+  if (adminHomeHeroSubtitle) {
+    adminHomeHeroSubtitle.value = dashboardContent.heroSubtitle;
+  }
+  if (adminHomeHeroDescription) {
+    adminHomeHeroDescription.value = dashboardContent.heroDescription;
+  }
+  if (adminHomePrimaryCtaText) {
+    adminHomePrimaryCtaText.value = dashboardContent.primaryCtaText;
+  }
+  if (adminHomePrimaryCtaHref) {
+    adminHomePrimaryCtaHref.value = dashboardContent.primaryCtaHref;
+  }
+  if (adminHomeSecondaryCtaText) {
+    adminHomeSecondaryCtaText.value = dashboardContent.secondaryCtaText;
+  }
+  if (adminHomeSecondaryCtaHref) {
+    adminHomeSecondaryCtaHref.value = dashboardContent.secondaryCtaHref;
+  }
+  if (adminHomeServicesHeading) {
+    adminHomeServicesHeading.value = dashboardContent.servicesHeading;
+  }
+  if (adminHomeServicesSubheading) {
+    adminHomeServicesSubheading.value = dashboardContent.servicesSubheading;
+  }
+  if (adminHomeFeatureHostelsTitle) {
+    adminHomeFeatureHostelsTitle.value = dashboardContent.featureHostelsTitle;
+  }
+  if (adminHomeFeatureHostelsDesc) {
+    adminHomeFeatureHostelsDesc.value = dashboardContent.featureHostelsDesc;
+  }
+  if (adminHomeFeatureFacilitiesTitle) {
+    adminHomeFeatureFacilitiesTitle.value = dashboardContent.featureFacilitiesTitle;
+  }
+  if (adminHomeFeatureFacilitiesDesc) {
+    adminHomeFeatureFacilitiesDesc.value = dashboardContent.featureFacilitiesDesc;
+  }
+  if (adminHomeFeatureGalleryTitle) {
+    adminHomeFeatureGalleryTitle.value = dashboardContent.featureGalleryTitle;
+  }
+  if (adminHomeFeatureGalleryDesc) {
+    adminHomeFeatureGalleryDesc.value = dashboardContent.featureGalleryDesc;
+  }
+  if (adminHomeFeatureFindUsTitle) {
+    adminHomeFeatureFindUsTitle.value = dashboardContent.featureFindUsTitle;
+  }
+  if (adminHomeFeatureFindUsDesc) {
+    adminHomeFeatureFindUsDesc.value = dashboardContent.featureFindUsDesc;
+  }
 }
 
 function fillHostelForm(hostelKey) {
@@ -2461,11 +2641,33 @@ adminContactForm?.addEventListener("submit", async (event) => {
     return;
   }
 
+  const nextDashboard = {
+    hero_tag: String(adminHomeHeroTag?.value || defaultDashboardContent.heroTag).trim(),
+    hero_title: String(adminHomeHeroTitle?.value || defaultDashboardContent.heroTitle).trim(),
+    hero_subtitle: String(adminHomeHeroSubtitle?.value || defaultDashboardContent.heroSubtitle).trim(),
+    hero_description: String(adminHomeHeroDescription?.value || defaultDashboardContent.heroDescription).trim(),
+    primary_cta_text: String(adminHomePrimaryCtaText?.value || defaultDashboardContent.primaryCtaText).trim(),
+    primary_cta_href: String(adminHomePrimaryCtaHref?.value || defaultDashboardContent.primaryCtaHref).trim(),
+    secondary_cta_text: String(adminHomeSecondaryCtaText?.value || defaultDashboardContent.secondaryCtaText).trim(),
+    secondary_cta_href: String(adminHomeSecondaryCtaHref?.value || defaultDashboardContent.secondaryCtaHref).trim(),
+    services_heading: String(adminHomeServicesHeading?.value || defaultDashboardContent.servicesHeading).trim(),
+    services_subheading: String(adminHomeServicesSubheading?.value || defaultDashboardContent.servicesSubheading).trim(),
+    feature_hostels_title: String(adminHomeFeatureHostelsTitle?.value || defaultDashboardContent.featureHostelsTitle).trim(),
+    feature_hostels_desc: String(adminHomeFeatureHostelsDesc?.value || defaultDashboardContent.featureHostelsDesc).trim(),
+    feature_facilities_title: String(adminHomeFeatureFacilitiesTitle?.value || defaultDashboardContent.featureFacilitiesTitle).trim(),
+    feature_facilities_desc: String(adminHomeFeatureFacilitiesDesc?.value || defaultDashboardContent.featureFacilitiesDesc).trim(),
+    feature_gallery_title: String(adminHomeFeatureGalleryTitle?.value || defaultDashboardContent.featureGalleryTitle).trim(),
+    feature_gallery_desc: String(adminHomeFeatureGalleryDesc?.value || defaultDashboardContent.featureGalleryDesc).trim(),
+    feature_findus_title: String(adminHomeFeatureFindUsTitle?.value || defaultDashboardContent.featureFindUsTitle).trim(),
+    feature_findus_desc: String(adminHomeFeatureFindUsDesc?.value || defaultDashboardContent.featureFindUsDesc).trim()
+  };
+
   const nextDetails = {
     phone: adminPhone.value.trim(),
     whatsapp: adminWhatsapp.value.trim().replace(/\D/g, ""),
     email: adminEmail.value.trim(),
-    address: adminAddress.value.trim()
+    address: adminAddress.value.trim(),
+    dashboard: nextDashboard
   };
 
   try {
@@ -2479,7 +2681,32 @@ adminContactForm?.addEventListener("submit", async (event) => {
       email: String(saved.email || nextDetails.email).trim(),
       address: String(saved.address || nextDetails.address).trim()
     };
+
+    const savedDashboard = saved.dashboard || nextDashboard;
+    dashboardContent = {
+      heroTag: String(savedDashboard.hero_tag || defaultDashboardContent.heroTag).trim(),
+      heroTitle: String(savedDashboard.hero_title || defaultDashboardContent.heroTitle).trim(),
+      heroSubtitle: String(savedDashboard.hero_subtitle || defaultDashboardContent.heroSubtitle).trim(),
+      heroDescription: String(savedDashboard.hero_description || defaultDashboardContent.heroDescription).trim(),
+      primaryCtaText: String(savedDashboard.primary_cta_text || defaultDashboardContent.primaryCtaText).trim(),
+      primaryCtaHref: String(savedDashboard.primary_cta_href || defaultDashboardContent.primaryCtaHref).trim(),
+      secondaryCtaText: String(savedDashboard.secondary_cta_text || defaultDashboardContent.secondaryCtaText).trim(),
+      secondaryCtaHref: String(savedDashboard.secondary_cta_href || defaultDashboardContent.secondaryCtaHref).trim(),
+      servicesHeading: String(savedDashboard.services_heading || defaultDashboardContent.servicesHeading).trim(),
+      servicesSubheading: String(savedDashboard.services_subheading || defaultDashboardContent.servicesSubheading).trim(),
+      featureHostelsTitle: String(savedDashboard.feature_hostels_title || defaultDashboardContent.featureHostelsTitle).trim(),
+      featureHostelsDesc: String(savedDashboard.feature_hostels_desc || defaultDashboardContent.featureHostelsDesc).trim(),
+      featureFacilitiesTitle: String(savedDashboard.feature_facilities_title || defaultDashboardContent.featureFacilitiesTitle).trim(),
+      featureFacilitiesDesc: String(savedDashboard.feature_facilities_desc || defaultDashboardContent.featureFacilitiesDesc).trim(),
+      featureGalleryTitle: String(savedDashboard.feature_gallery_title || defaultDashboardContent.featureGalleryTitle).trim(),
+      featureGalleryDesc: String(savedDashboard.feature_gallery_desc || defaultDashboardContent.featureGalleryDesc).trim(),
+      featureFindUsTitle: String(savedDashboard.feature_findus_title || defaultDashboardContent.featureFindUsTitle).trim(),
+      featureFindUsDesc: String(savedDashboard.feature_findus_desc || defaultDashboardContent.featureFindUsDesc).trim()
+    };
+
     applyContactDetailsToPage();
+    applyDashboardContentToPage();
+    fillAdminContactForm();
 
     if (adminStatus) {
       adminStatus.textContent = "Contact details updated in DB.";
@@ -2503,8 +2730,32 @@ adminResetBtn?.addEventListener("click", async () => {
       email: String(reset.email || defaultContactDetails.email).trim(),
       address: String(reset.address || defaultContactDetails.address).trim()
     };
+
+    const resetDashboard = reset.dashboard || {};
+    dashboardContent = {
+      heroTag: String(resetDashboard.hero_tag || defaultDashboardContent.heroTag).trim(),
+      heroTitle: String(resetDashboard.hero_title || defaultDashboardContent.heroTitle).trim(),
+      heroSubtitle: String(resetDashboard.hero_subtitle || defaultDashboardContent.heroSubtitle).trim(),
+      heroDescription: String(resetDashboard.hero_description || defaultDashboardContent.heroDescription).trim(),
+      primaryCtaText: String(resetDashboard.primary_cta_text || defaultDashboardContent.primaryCtaText).trim(),
+      primaryCtaHref: String(resetDashboard.primary_cta_href || defaultDashboardContent.primaryCtaHref).trim(),
+      secondaryCtaText: String(resetDashboard.secondary_cta_text || defaultDashboardContent.secondaryCtaText).trim(),
+      secondaryCtaHref: String(resetDashboard.secondary_cta_href || defaultDashboardContent.secondaryCtaHref).trim(),
+      servicesHeading: String(resetDashboard.services_heading || defaultDashboardContent.servicesHeading).trim(),
+      servicesSubheading: String(resetDashboard.services_subheading || defaultDashboardContent.servicesSubheading).trim(),
+      featureHostelsTitle: String(resetDashboard.feature_hostels_title || defaultDashboardContent.featureHostelsTitle).trim(),
+      featureHostelsDesc: String(resetDashboard.feature_hostels_desc || defaultDashboardContent.featureHostelsDesc).trim(),
+      featureFacilitiesTitle: String(resetDashboard.feature_facilities_title || defaultDashboardContent.featureFacilitiesTitle).trim(),
+      featureFacilitiesDesc: String(resetDashboard.feature_facilities_desc || defaultDashboardContent.featureFacilitiesDesc).trim(),
+      featureGalleryTitle: String(resetDashboard.feature_gallery_title || defaultDashboardContent.featureGalleryTitle).trim(),
+      featureGalleryDesc: String(resetDashboard.feature_gallery_desc || defaultDashboardContent.featureGalleryDesc).trim(),
+      featureFindUsTitle: String(resetDashboard.feature_findus_title || defaultDashboardContent.featureFindUsTitle).trim(),
+      featureFindUsDesc: String(resetDashboard.feature_findus_desc || defaultDashboardContent.featureFindUsDesc).trim()
+    };
+
     fillAdminContactForm();
     applyContactDetailsToPage();
+    applyDashboardContentToPage();
 
     if (adminStatus) {
       adminStatus.textContent = "Contact details reset in DB.";
@@ -2829,6 +3080,7 @@ resetMainGalleryBtn?.addEventListener("click", async () => {
 setAdminFormMode("create");
 
 applyContactDetailsToPage();
+applyDashboardContentToPage();
 applyHostelCardsData();
 applyHostelDetailData();
 applyMainGalleryData();
