@@ -22,11 +22,23 @@ const fallbackHostelCoordinatesBySlug = {
   }
 };
 
+function isHostelCoordinateInServiceArea(latitude, longitude) {
+  const lat = Number(latitude);
+  const lon = Number(longitude);
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+    return false;
+  }
+
+  // Restrict to expected local area so stale admin edits cannot send routes to wrong countries.
+  return lat >= 15 && lat <= 18 && lon >= 79 && lon <= 82;
+}
+
 function resolveHostelCoordinates(hostel) {
-  if (Number.isFinite(hostel?.latitude) && Number.isFinite(hostel?.longitude)) {
+  if (isHostelCoordinateInServiceArea(hostel?.latitude, hostel?.longitude)) {
     return {
-      latitude: hostel.latitude,
-      longitude: hostel.longitude
+      latitude: Number(hostel.latitude),
+      longitude: Number(hostel.longitude)
     };
   }
 

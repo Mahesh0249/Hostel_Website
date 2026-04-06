@@ -753,6 +753,18 @@ let distanceHostelMarker = null;
 let distanceOriginMarker = null;
 let distanceRouteLine = null;
 
+function isHostelCoordinateInServiceArea(latitude, longitude) {
+  const lat = Number(latitude);
+  const lon = Number(longitude);
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+    return false;
+  }
+
+  // Keep hostel destinations within the expected Vijayawada area.
+  return lat >= 15 && lat <= 18 && lon >= 79 && lon <= 82;
+}
+
 function ensureDistanceMapReady() {
   if (!distanceMapCanvas || typeof window.L === "undefined") {
     return false;
@@ -779,12 +791,20 @@ function getHostelCoordinates(hostelKey) {
   const apiHostel = apiHostelsByKey[hostelKey];
   const fallbackHostel = hostelsData[hostelKey] || {};
 
-  const latitude = Number.isFinite(apiHostel?.latitude)
-    ? Number(apiHostel.latitude)
-    : (Number.isFinite(fallbackHostel.latitude) ? Number(fallbackHostel.latitude) : null);
-  const longitude = Number.isFinite(apiHostel?.longitude)
-    ? Number(apiHostel.longitude)
-    : (Number.isFinite(fallbackHostel.longitude) ? Number(fallbackHostel.longitude) : null);
+  const apiLatitude = Number(apiHostel?.latitude);
+  const apiLongitude = Number(apiHostel?.longitude);
+  const fallbackLatitude = Number(fallbackHostel.latitude);
+  const fallbackLongitude = Number(fallbackHostel.longitude);
+
+  const useApiCoordinates = isHostelCoordinateInServiceArea(apiLatitude, apiLongitude);
+  const useFallbackCoordinates = isHostelCoordinateInServiceArea(fallbackLatitude, fallbackLongitude);
+
+  const latitude = useApiCoordinates
+    ? apiLatitude
+    : (useFallbackCoordinates ? fallbackLatitude : null);
+  const longitude = useApiCoordinates
+    ? apiLongitude
+    : (useFallbackCoordinates ? fallbackLongitude : null);
 
   if (latitude === null || longitude === null) {
     return null;
@@ -1130,12 +1150,20 @@ async function fallbackDistanceEstimate(location, selectedHostelKey, selectedHos
   const apiHostel = apiHostelsByKey[selectedHostelKey];
   const fallbackHostel = hostelsData[selectedHostelKey] || {};
 
-  const latitude = Number.isFinite(apiHostel?.latitude)
-    ? Number(apiHostel.latitude)
-    : (Number.isFinite(fallbackHostel.latitude) ? Number(fallbackHostel.latitude) : null);
-  const longitude = Number.isFinite(apiHostel?.longitude)
-    ? Number(apiHostel.longitude)
-    : (Number.isFinite(fallbackHostel.longitude) ? Number(fallbackHostel.longitude) : null);
+  const apiLatitude = Number(apiHostel?.latitude);
+  const apiLongitude = Number(apiHostel?.longitude);
+  const fallbackLatitude = Number(fallbackHostel.latitude);
+  const fallbackLongitude = Number(fallbackHostel.longitude);
+
+  const useApiCoordinates = isHostelCoordinateInServiceArea(apiLatitude, apiLongitude);
+  const useFallbackCoordinates = isHostelCoordinateInServiceArea(fallbackLatitude, fallbackLongitude);
+
+  const latitude = useApiCoordinates
+    ? apiLatitude
+    : (useFallbackCoordinates ? fallbackLatitude : null);
+  const longitude = useApiCoordinates
+    ? apiLongitude
+    : (useFallbackCoordinates ? fallbackLongitude : null);
 
   if (latitude === null || longitude === null) {
     distanceResult.innerHTML = `<p>${escapeHtml(originalError?.message || "Distance service unavailable right now.")}</p>`;
