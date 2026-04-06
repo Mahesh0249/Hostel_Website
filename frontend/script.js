@@ -842,6 +842,19 @@ function clearDistanceRouteArtifacts() {
   }
 }
 
+function getDistanceMapFitPadding() {
+  if (!distanceOverlay || window.innerWidth <= 980) {
+    return {
+      padding: [24, 24]
+    };
+  }
+
+  return {
+    paddingTopLeft: [distanceOverlay.offsetWidth + 40, 40],
+    paddingBottomRight: [24, 24]
+  };
+}
+
 function buildOsmDirectionsUrl(origin, destination) {
   return (
     "https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=" +
@@ -877,7 +890,10 @@ function focusMapOnHostel(hostelKey) {
     .bindPopup(hostelName)
     .openPopup();
 
-  distanceLeafletMap.setView([coords.latitude, coords.longitude], 15);
+  const markerBounds = window.L.latLngBounds(
+    [window.L.latLng(coords.latitude, coords.longitude), window.L.latLng(coords.latitude, coords.longitude)]
+  ).pad(0.01);
+  distanceLeafletMap.fitBounds(markerBounds, getDistanceMapFitPadding());
 
   if (mapLink) {
     mapLink.href = `https://www.openstreetmap.org/?mlat=${coords.latitude}&mlon=${coords.longitude}#map=15/${coords.latitude}/${coords.longitude}`;
@@ -933,7 +949,7 @@ function renderRouteOnMap(hostelKey, origin, routeCoordinates = []) {
     opacity: 0.85
   }).addTo(distanceLeafletMap);
 
-  distanceLeafletMap.fitBounds(distanceRouteLine.getBounds(), { padding: [24, 24] });
+  distanceLeafletMap.fitBounds(distanceRouteLine.getBounds(), getDistanceMapFitPadding());
 
   if (mapLink) {
     mapLink.href = buildOsmDirectionsUrl(origin, destination);
