@@ -37,8 +37,8 @@ const defaultHostelsData = {
       "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1400&q=80",
     heroImage:
       "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1600&q=80",
-    latitude: 16.48394726914612,
-    longitude: 80.68697619534079,
+    latitude: 16.48386496614565,
+    longitude: 80.68704056835566,
     facilities: [
       "High Speed WiFi",
       "Daily Mess Food",
@@ -71,8 +71,8 @@ const defaultHostelsData = {
       "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=80",
     heroImage:
       "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1600&q=80",
-    latitude: 16.485739473366305,
-    longitude: 80.68799956600591,
+    latitude: 16.485776025395335,
+    longitude: 80.68794589534089,
     facilities: [
       "High Speed WiFi",
       "Attached Bathrooms",
@@ -105,8 +105,8 @@ const defaultHostelsData = {
       "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1400&q=80",
     heroImage:
       "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1600&q=80",
-    latitude: 16.483126283484175,
-    longitude: 80.69665525497054,
+    latitude: 16.48328895461507,
+    longitude: 80.6966962530124,
     facilities: [
       "High Speed WiFi",
       "Well Maintained Premium Rooms",

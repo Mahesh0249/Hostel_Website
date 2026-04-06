@@ -9,16 +9,16 @@ const hostelKeyToSlug = {
 
 const fallbackHostelCoordinatesBySlug = {
   "sai-praneeth-boys-hostel-1": {
-    latitude: 16.48394726914612,
-    longitude: 80.68697619534079
+    latitude: 16.48386496614565,
+    longitude: 80.68704056835566
   },
   "sai-praneeth-boys-hostel-2": {
-    latitude: 16.485739473366305,
-    longitude: 80.68799956600591
+    latitude: 16.485776025395335,
+    longitude: 80.68794589534089
   },
   "elvy-stays": {
-    latitude: 16.483126283484175,
-    longitude: 80.69665525497054
+    latitude: 16.48328895461507,
+    longitude: 80.6966962530124
   }
 };
 
